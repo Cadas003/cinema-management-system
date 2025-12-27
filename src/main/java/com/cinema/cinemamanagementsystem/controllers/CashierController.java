@@ -421,7 +421,7 @@ public class CashierController implements Initializable {
         }
 
         try {
-            int paymentMethodId = getPaymentMethodId(paymentMethodCombo.getValue());
+            int paymentMethodId = 1;
 
             if (bookingService.confirmBooking(
                     selectedBooking.getTicketId(),
@@ -504,15 +504,6 @@ public class CashierController implements Initializable {
 
         } catch (NumberFormatException e) {
             showAlert("Ошибка", "Некорректный номер билета", Alert.AlertType.ERROR);
-        }
-    }
-
-    private int getPaymentMethodId(String methodName) {
-        switch (methodName) {
-            case "Банковская карта": return 1;
-            case "Наличные": return 2;
-            case "СБП": return 3;
-            default: return 1;
         }
     }
 
