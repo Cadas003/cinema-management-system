@@ -61,6 +61,21 @@ public class TicketDao {
         return result;
     }
 
+    public Ticket findById(long ticketId) throws SQLException {
+        String sql = "SELECT ticket_id, showtime_id, seat_id, customer_id, user_id, status_id, created_at "
+                + "FROM ticket WHERE ticket_id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, ticketId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return mapTicket(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Integer> findOccupiedSeatIds(int showtimeId, List<Integer> excludedStatusIds) throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT seat_id FROM ticket WHERE showtime_id = ?");
         if (!excludedStatusIds.isEmpty()) {

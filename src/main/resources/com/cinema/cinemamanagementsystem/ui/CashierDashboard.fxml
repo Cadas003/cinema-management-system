@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -52,6 +53,20 @@
 
                         <Label text="Занятые места:" />
                         <TextArea fx:id="occupiedSeatsArea" prefRowCount="4" />
+                    </VBox>
+                </content>
+            </Tab>
+            <Tab text="Схема зала">
+                <content>
+                    <VBox spacing="12" padding="10">
+                        <HBox spacing="10">
+                            <Button text="Построить схему" onAction="#handleBuildSeatMap" />
+                            <Button text="Бронь выбранных" onAction="#handleReserveSelectedSeats" />
+                            <Button text="Покупка выбранных" onAction="#handlePurchaseSelectedSeats" />
+                        </HBox>
+                        <GridPane fx:id="seatMapGrid" hgap="6" vgap="6" />
+                        <Label text="Выбранные места:" />
+                        <TextArea fx:id="selectedSeatsArea" prefRowCount="3" />
                     </VBox>
                 </content>
             </Tab>

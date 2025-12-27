@@ -31,13 +31,7 @@ public class TicketService {
 
     public void reserveTickets(int showtimeId, List<Integer> seatIds, Integer customerId, int userId) throws SQLException {
         int reservedStatusId = statusId("забронирован");
-        List<Integer> excluded = List.of(statusId("отменён"), statusId("возврат"));
-        List<Integer> occupied = ticketDao.findOccupiedSeatIds(showtimeId, excluded);
-        for (Integer seatId : seatIds) {
-            if (occupied.contains(seatId)) {
-                throw new IllegalStateException("Место уже занято: " + seatId);
-            }
-        }
+        ensureSeatsAvailable(showtimeId, seatIds);
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -58,11 +52,21 @@ public class TicketService {
 
     public void confirmReservation(long ticketId, int userId, int paymentMethodId) throws SQLException {
         int paidStatusId = statusId("оплачен");
+        int reservedStatusId = statusId("забронирован");
+        Ticket ticket = ticketDao.findById(ticketId);
+        if (ticket == null) {
+            throw new IllegalArgumentException("Билет не найден");
+        }
+        if (ticket.statusId() != reservedStatusId) {
+            throw new IllegalStateException("Билет не находится в статусе брони");
+        }
+        if (ticket.createdAt() != null && ticket.createdAt().isBefore(LocalDateTime.now().minusMinutes(30))) {
+            throw new IllegalStateException("Бронь просрочена и должна быть отменена");
+        }
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 BigDecimal amount = calculatePrice(ticketId, true);
-                Ticket ticket = new Ticket(ticketId, 0, 0, null, userId, paidStatusId, LocalDateTime.now());
                 ticketDao.updateStatus(connection, ticketId, paidStatusId);
                 Payment payment = new Payment(0, ticketId, userId, amount, paymentMethodId, LocalDateTime.now());
                 paymentDao.create(connection, payment);
@@ -79,6 +83,7 @@ public class TicketService {
     public void directPurchase(int showtimeId, int seatId, Integer customerId, int userId, int paymentMethodId)
             throws SQLException {
         int paidStatusId = statusId("оплачен");
+        ensureSeatsAvailable(showtimeId, List.of(seatId));
         BigDecimal amount = calculatePrice(showtimeId, false);
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
@@ -171,5 +176,15 @@ public class TicketService {
         return ticketStatusDao.findByName(name)
                 .orElseThrow(() -> new IllegalStateException("Статус не найден: " + name))
                 .statusId();
+    }
+
+    private void ensureSeatsAvailable(int showtimeId, List<Integer> seatIds) throws SQLException {
+        List<Integer> excluded = List.of(statusId("отменён"), statusId("возврат"));
+        List<Integer> occupied = ticketDao.findOccupiedSeatIds(showtimeId, excluded);
+        for (Integer seatId : seatIds) {
+            if (occupied.contains(seatId)) {
+                throw new IllegalStateException("Место уже занято: " + seatId);
+            }
+        }
     }
 }
