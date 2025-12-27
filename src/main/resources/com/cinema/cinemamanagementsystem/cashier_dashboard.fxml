@@ -64,6 +64,9 @@
                                                   prefTileWidth="220"
                                                   prefTileHeight="140"
                                                   styleClass="film-tiles film-grid"/>
+                                        <padding>
+                                            <Insets top="10" right="10" bottom="10" left="10"/>
+                                        </padding>
                                     </ScrollPane>
                                 </VBox>
                             </VBox>
