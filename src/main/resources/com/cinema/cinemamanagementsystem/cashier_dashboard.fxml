@@ -63,7 +63,11 @@
                                                   hgap="12" vgap="12"
                                                   prefTileWidth="220"
                                                   prefTileHeight="140"
-                                                  styleClass="film-tiles film-grid"/>
+                                                  styleClass="film-tiles film-grid">
+                                            <padding>
+                                                <Insets top="16" right="16" bottom="16" left="16"/>
+                                            </padding>
+                                        </TilePane>
                                         <padding>
                                             <Insets top="10" right="10" bottom="10" left="10"/>
                                         </padding>
