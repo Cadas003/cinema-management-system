@@ -50,6 +50,12 @@
                             <Button fx:id="deleteFilmButton" text="Удалить" styleClass="button-danger"/>
                         </HBox>
 
+                        <HBox spacing="12">
+                            <Label text="Всего фильмов: -" styleClass="stat-chip"/>
+                            <Label text="Сеансов сегодня: -" styleClass="stat-chip"/>
+                            <Label text="Обновление: автоматически" styleClass="stat-chip"/>
+                        </HBox>
+
                         <TableView fx:id="filmsTable" styleClass="card">
                             <columns>
                                 <TableColumn fx:id="filmIdColumn" text="ID" prefWidth="60"/>
@@ -65,7 +71,7 @@
                     <VBox spacing="16" styleClass="content-wrapper">
                         <HBox spacing="16">
                             <VBox spacing="12" styleClass="card" prefWidth="420">
-                                <Label text="Новый сеанс" styleClass="section-title"/>
+                                <Label text="Новый сеанс" styleClass="card-title"/>
                                 <DatePicker fx:id="showtimeDatePicker" promptText="Дата"/>
                                 <ComboBox fx:id="filmComboBox" promptText="Фильм"/>
                                 <ComboBox fx:id="hallComboBox" promptText="Зал"/>
@@ -74,15 +80,18 @@
                                 <Button fx:id="addShowtimeButton" text="Добавить сеанс" styleClass="button-primary"/>
                             </VBox>
 
-                            <TableView fx:id="showtimesTable" styleClass="card" VBox.vgrow="ALWAYS">
-                                <columns>
-                                    <TableColumn fx:id="showtimeIdColumn" text="ID" prefWidth="60"/>
-                                    <TableColumn fx:id="showtimeFilmColumn" text="Фильм" prefWidth="240"/>
-                                    <TableColumn fx:id="showtimeHallColumn" text="Зал" prefWidth="150"/>
-                                    <TableColumn fx:id="showtimeDateTimeColumn" text="Дата и время" prefWidth="200"/>
-                                    <TableColumn fx:id="showtimePriceColumn" text="Цена" prefWidth="120"/>
-                                </columns>
-                            </TableView>
+                            <VBox spacing="10" VBox.vgrow="ALWAYS">
+                                <Label text="Список сеансов" styleClass="card-title"/>
+                                <TableView fx:id="showtimesTable" styleClass="card" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="showtimeIdColumn" text="ID" prefWidth="60"/>
+                                        <TableColumn fx:id="showtimeFilmColumn" text="Фильм" prefWidth="240"/>
+                                        <TableColumn fx:id="showtimeHallColumn" text="Зал" prefWidth="150"/>
+                                        <TableColumn fx:id="showtimeDateTimeColumn" text="Дата и время" prefWidth="200"/>
+                                        <TableColumn fx:id="showtimePriceColumn" text="Цена" prefWidth="120"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
                         </HBox>
                     </VBox>
                 </Tab>
@@ -97,12 +106,15 @@
                             <Button fx:id="exportReportButton" text="Экспорт" styleClass="button-success"/>
                         </HBox>
 
-                        <HBox spacing="12">
+                        <HBox spacing="12" styleClass="soft-card">
                             <Label fx:id="totalRevenueLabel" text="Общая выручка: -" styleClass="stat-chip"/>
                             <Label fx:id="totalTicketsLabel" text="Продано билетов: -" styleClass="stat-chip"/>
                         </HBox>
 
-                        <TableView fx:id="reportTable" styleClass="card" VBox.vgrow="ALWAYS"/>
+                        <VBox spacing="10" VBox.vgrow="ALWAYS">
+                            <Label text="Детализация отчета" styleClass="card-title"/>
+                            <TableView fx:id="reportTable" styleClass="card" VBox.vgrow="ALWAYS"/>
+                        </VBox>
                     </VBox>
                 </Tab>
             </tabs>

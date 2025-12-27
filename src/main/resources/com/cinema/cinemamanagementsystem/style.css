@@ -3,17 +3,19 @@
    =========================== */
 .root, .app-root {
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
-    -fx-background-color: #f4f6f9;
+    -fx-background-color: linear-gradient(to bottom, #f7f9fc, #eef2f7);
+    -fx-text-fill: #2c3e50;
 }
 
 .app-header {
-    -fx-background-color: linear-gradient(to right, #1f2a44, #2c3e50);
-    -fx-padding: 18 20 14 20;
+    -fx-background-color: linear-gradient(to right, #1c2541, #243b55);
+    -fx-padding: 18 24 16 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 16, 0.2, 0, 3);
 }
 
 .header-title {
     -fx-text-fill: white;
-    -fx-font-size: 20px;
+    -fx-font-size: 21px;
     -fx-font-weight: bold;
 }
 
@@ -35,7 +37,7 @@
 
 .app-footer {
     -fx-background-color: #ecf0f1;
-    -fx-padding: 10 16;
+    -fx-padding: 10 18;
 }
 
 .status-ready {
@@ -44,10 +46,16 @@
 }
 
 .content-wrapper {
-    -fx-padding: 20;
+    -fx-padding: 22;
 }
 
 .content-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.content-scroll .viewport {
     -fx-background-color: transparent;
 }
 
@@ -55,7 +63,7 @@
     -fx-background-color: white;
     -fx-background-radius: 12;
     -fx-padding: 12 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 16, 0.2, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.2, 0, 3);
 }
 
 .section-title {
@@ -80,21 +88,21 @@
 }
 
 .stat-chip {
-    -fx-background-color: #fff0f0;
-    -fx-text-fill: #c0392b;
+    -fx-background-color: #edf4ff;
+    -fx-text-fill: #1f6feb;
     -fx-font-weight: bold;
     -fx-padding: 6 12;
     -fx-background-radius: 20;
 }
 
 .hint-card {
-    -fx-background-color: #e8f5e9;
+    -fx-background-color: #e8f3ff;
     -fx-background-radius: 10;
     -fx-padding: 12;
 }
 
 .hint-title {
-    -fx-text-fill: #27ae60;
+    -fx-text-fill: #1f6feb;
     -fx-font-weight: bold;
 }
 
@@ -109,6 +117,40 @@
 
 .app-menubar {
     -fx-background-color: transparent;
+}
+
+.app-menubar .menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.app-menubar .menu-button:hover {
+    -fx-background-color: rgba(255,255,255,0.15);
+}
+
+.card-title {
+    -fx-text-fill: #1f2a44;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.soft-card {
+    -fx-background-color: #f9fbff;
+    -fx-background-radius: 12;
+    -fx-padding: 14;
+    -fx-border-color: #e1e8f2;
+    -fx-border-radius: 12;
+}
+
+.seat-card {
+    -fx-background-color: #1f2a44;
+    -fx-background-radius: 14;
+    -fx-padding: 16;
+}
+
+.seat-card .label {
+    -fx-text-fill: white;
 }
 
 /* Мягкая тень для всех крупных панелей */
@@ -199,6 +241,15 @@
     -fx-border-width: 1 1 0 1;
 }
 
+.main-tabs .tab-header-area {
+    -fx-padding: 0 12;
+    -fx-background-color: transparent;
+}
+
+.main-tabs .tab-content-area {
+    -fx-background-color: transparent;
+}
+
 .tab-label {
     -fx-font-weight: bold;
     -fx-font-size: 14px;
@@ -212,6 +263,22 @@
     -fx-border-color: #d0d7de;
     -fx-background-radius: 10;
     -fx-padding: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f3f6fb;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-color: transparent transparent #e1e8f2 transparent;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 36;
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #1f2a44;
+    -fx-font-weight: bold;
 }
 
 .table-row-cell {
@@ -231,6 +298,10 @@
     -fx-font-weight: bold;
     -fx-padding: 8 18;
     -fx-font-size: 14px;
+}
+
+.button:focused {
+    -fx-effect: dropshadow(gaussian, rgba(79,172,254,0.35), 12, 0.3, 0, 0);
 }
 
 .button-primary {

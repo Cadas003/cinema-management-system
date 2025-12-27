@@ -63,13 +63,15 @@
                                 <VBox spacing="14" prefWidth="650">
                                     <Label text="Фильмы и сеансы на выбранную дату:" styleClass="section-title"/>
 
-                                    <ScrollPane prefHeight="260" styleClass="content-scroll">
-                                        <TilePane fx:id="filmsTilePane"
-                                                  hgap="15" vgap="15"
-                                                  prefTileWidth="250"
-                                                  prefTileHeight="150"
-                                                  styleClass="film-tiles"/>
-                                    </ScrollPane>
+                                    <VBox spacing="10" styleClass="card">
+                                        <ScrollPane prefHeight="260" styleClass="content-scroll">
+                                            <TilePane fx:id="filmsTilePane"
+                                                      hgap="15" vgap="15"
+                                                      prefTileWidth="250"
+                                                      prefTileHeight="150"
+                                                      styleClass="film-tiles"/>
+                                        </ScrollPane>
+                                    </VBox>
 
                                     <Label text="Информация о выбранном сеансе:" styleClass="section-title"/>
                                     <VBox spacing="6" styleClass="card">
@@ -80,7 +82,10 @@
                                     </VBox>
 
                                     <Label text="Выбор места:" styleClass="section-title"/>
-                                    <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                                    <VBox spacing="10" styleClass="seat-card">
+                                        <Label text="Экран" styleClass="screen" alignment="CENTER"/>
+                                        <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                                    </VBox>
                                 </VBox>
 
                                 <VBox spacing="16" prefWidth="360">
@@ -104,7 +109,7 @@
                                     </VBox>
 
                                     <Label text="Тип операции" styleClass="section-title"/>
-                                    <HBox spacing="16" styleClass="card">
+                                    <HBox spacing="16" styleClass="soft-card">
                                         <VBox spacing="6">
                                             <RadioButton fx:id="immediateSaleRadio" text="Немедленная продажа" selected="true"/>
                                             <Label text="Билет сразу продается" styleClass="help-text"/>
