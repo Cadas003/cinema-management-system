@@ -147,6 +147,33 @@ public final class UiDialogs {
         dialogStage.showAndWait();
     }
 
-    public record SaleSummary(String totalAmount, String changeAmount, String operationId, String ticketIds) {
+    public static final class SaleSummary {
+        private final String totalAmount;
+        private final String changeAmount;
+        private final String operationId;
+        private final String ticketIds;
+
+        public SaleSummary(String totalAmount, String changeAmount, String operationId, String ticketIds) {
+            this.totalAmount = totalAmount;
+            this.changeAmount = changeAmount;
+            this.operationId = operationId;
+            this.ticketIds = ticketIds;
+        }
+
+        public String totalAmount() {
+            return totalAmount;
+        }
+
+        public String changeAmount() {
+            return changeAmount;
+        }
+
+        public String operationId() {
+            return operationId;
+        }
+
+        public String ticketIds() {
+            return ticketIds;
+        }
     }
 }
