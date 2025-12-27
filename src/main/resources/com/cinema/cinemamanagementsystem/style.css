@@ -8,9 +8,10 @@
 }
 
 .app-header {
-    -fx-background-color: linear-gradient(to right, #1f2a44, #2f3f5f);
-    -fx-padding: 14 20 12 20;
-    -fx-effect: dropshadow(gaussian, rgba(12,18,32,0.25), 14, 0.25, 0, 2);
+    -fx-background-color: linear-gradient(to right, #232a5a, #4b2c7a);
+    -fx-padding: 18 24 16 24;
+    -fx-effect: dropshadow(gaussian, rgba(24,20,60,0.35), 18, 0.3, 0, 4);
+    -fx-background-radius: 18 18 0 0;
 }
 
 .header-title {
@@ -46,7 +47,7 @@
 }
 
 .content-wrapper {
-    -fx-padding: 12;
+    -fx-padding: 16;
 }
 
 .content-scroll {
@@ -144,9 +145,9 @@
 }
 
 .seat-card {
-    -fx-background-color: #1f2f46;
-    -fx-background-radius: 12;
-    -fx-padding: 12;
+    -fx-background-color: #1f2b45;
+    -fx-background-radius: 16;
+    -fx-padding: 14;
 }
 
 .seat-card .label {
@@ -156,9 +157,9 @@
 /* Мягкая тень для всех крупных панелей */
 .card {
     -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-padding: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 16, 0.2, 0, 3);
+    -fx-background-radius: 16;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0.25, 0, 4);
 }
 
 /* ===========================
@@ -230,14 +231,14 @@
 }
 
 .main-tabs .tab {
-    -fx-background-color: #e3e7ec;
-    -fx-background-radius: 8 8 0 0;
-    -fx-padding: 6 12;
+    -fx-background-color: #e9e9f3;
+    -fx-background-radius: 14 14 0 0;
+    -fx-padding: 8 16;
 }
 
 .main-tabs .tab:selected {
     -fx-background-color: white;
-    -fx-border-color: #d0d7de;
+    -fx-border-color: #e0e2ee;
     -fx-border-width: 1 1 0 1;
 }
 
@@ -250,7 +251,7 @@
 }
 
 .main-tabs .tab-header-area {
-    -fx-padding: 0 12;
+    -fx-padding: 6 16;
     -fx-background-color: transparent;
 }
 
@@ -313,7 +314,7 @@
 }
 
 .button-primary {
-    -fx-background-color: #3d6df2;
+    -fx-background-color: #3f6ae0;
     -fx-text-fill: white;
 }
 
@@ -322,7 +323,7 @@
 }
 
 .button-success {
-    -fx-background-color: #24b36b;
+    -fx-background-color: #3ba87b;
     -fx-text-fill: white;
 }
 
@@ -385,9 +386,9 @@
    СХЕМА ЗАЛА
    =========================== */
 .seat-grid {
-    -fx-background-color: #223048;
-    -fx-background-radius: 10;
-    -fx-padding: 10;
+    -fx-background-color: #1d2940;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
 }
 
 .seat {
@@ -415,11 +416,11 @@
 }
 
 .screen {
-    -fx-background-color: #2d3d57;
+    -fx-background-color: #2b3a5c;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-padding: 6;
-    -fx-background-radius: 8;
+    -fx-background-radius: 10;
 }
 
 .compact-grid {
@@ -434,9 +435,9 @@
 
 .sidebar-card {
     -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-padding: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 12, 0.2, 0, 2);
+    -fx-background-radius: 16;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.25, 0, 3);
 }
 
 .compact-card {
@@ -445,4 +446,99 @@
 
 .compact-toolbar {
     -fx-background-radius: 10;
+}
+
+.hero-card {
+    -fx-background-color: linear-gradient(to right, #ffffff, #f2f4ff);
+    -fx-background-radius: 18;
+    -fx-padding: 14 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0.25, 0, 4);
+}
+
+.hero-title {
+    -fx-text-fill: #2f3a58;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.hero-subtitle {
+    -fx-text-fill: #4d5a7a;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.hero-hint {
+    -fx-text-fill: #7a869f;
+    -fx-font-size: 11px;
+}
+
+.hero-icon {
+    -fx-font-size: 16px;
+}
+
+.button-secondary {
+    -fx-background-color: #eef1ff;
+    -fx-text-fill: #4a5bd6;
+    -fx-background-radius: 16;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+}
+
+.showtime-card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f6f7fb);
+    -fx-background-radius: 18;
+    -fx-border-color: #e6e9f3;
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 18, 0.2, 0, 4);
+}
+
+.showtime-title {
+    -fx-text-fill: #29334f;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.showtime-time {
+    -fx-background-color: #4f77e6;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+}
+
+.showtime-hall {
+    -fx-text-fill: #6b7694;
+    -fx-font-size: 11px;
+}
+
+.showtime-seats-ok {
+    -fx-text-fill: #2fa36a;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.showtime-seats-warning {
+    -fx-text-fill: #f0a33c;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.showtime-seats-busy {
+    -fx-text-fill: #e2554f;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.showtime-empty {
+    -fx-text-fill: #a0a7bd;
+    -fx-font-size: 12px;
+}
+
+.showtime-open {
+    -fx-background-color: linear-gradient(to right, #5a86ff, #3c6ae0);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
 }

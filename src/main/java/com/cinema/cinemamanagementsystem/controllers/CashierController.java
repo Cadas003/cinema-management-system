@@ -174,6 +174,14 @@ public class CashierController implements Initializable {
         });
     }
 
+    @FXML
+    private void handleToday() {
+        LocalDate today = LocalDate.now();
+        datePicker.setValue(today);
+        selectedDate = today;
+        loadFilmsForDate(selectedDate);
+    }
+
     private void setupBookingsTab() {
         bookingIdColumn.setCellValueFactory(new PropertyValueFactory<>("ticketId"));
         bookingFilmColumn.setCellValueFactory(new PropertyValueFactory<>("filmTitle"));
@@ -259,26 +267,24 @@ public class CashierController implements Initializable {
 
         // Если фильмов нет
         if (films.isEmpty()) {
-            Label noFilmsLabel = new Label("На " + date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
-                    " сеансов нет");
-            noFilmsLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 14;");
+            Label noFilmsLabel = new Label("Нет сеансов на выбранную дату");
+            noFilmsLabel.getStyleClass().add("showtime-empty");
             filmsTilePane.getChildren().add(noFilmsLabel);
         }
     }
 
     private VBox createFilmCard(Film film, LocalDate date, List<Showtime> filmShowtimesParam) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setPrefWidth(200);
-        card.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; " +
-                "-fx-border-color: #2c3e50; -fx-border-radius: 10;");
+        VBox card = new VBox(12);
+        card.setPadding(new Insets(16));
+        card.setPrefWidth(240);
+        card.getStyleClass().add("showtime-card");
         card.setUserData(film);
 
         // Заголовок фильма
         Label titleLabel = new Label(film.getTitle());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: white;");
+        titleLabel.getStyleClass().add("showtime-title");
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(180);
+        titleLabel.setMaxWidth(220);
 
         // Создаем effectively final копию списка
         final List<Showtime> showtimesList;
@@ -291,33 +297,31 @@ public class CashierController implements Initializable {
             showtimesList.sort(Comparator.comparing(Showtime::getDateTime));
         }
 
-        VBox timesBox = new VBox(5);
+        VBox timesBox = new VBox(6);
 
         for (Showtime showtime : showtimesList) {
-            HBox timeRow = new HBox(10);
+            HBox timeRow = new HBox(8);
             timeRow.setAlignment(Pos.CENTER_LEFT);
 
             // Кнопка времени
             Button timeBtn = new Button(showtime.getDateTime()
                     .format(DateTimeFormatter.ofPattern("HH:mm")));
-            timeBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; " +
-                    "-fx-font-weight: bold; -fx-min-width: 60;");
+            timeBtn.getStyleClass().add("showtime-time");
             timeBtn.setUserData(showtime);
             timeBtn.setOnAction(e -> openTicketWindow(showtime));
 
             // Информация о зале и свободных местах
             Label hallLabel = new Label("Зал " + showtime.getHallName());
-            hallLabel.setStyle("-fx-text-fill: #bdc3c7; -fx-font-size: 11;");
+            hallLabel.getStyleClass().add("showtime-hall");
 
             int totalSeats = showtimeDAO.getSeatsForShowtime(showtime.getShowtimeId()).size();
             int takenSeats = showtimeDAO.getTakenSeats(showtime.getShowtimeId()).size();
             int freeSeats = totalSeats - takenSeats;
 
-            Label seatsLabel = new Label(freeSeats + " мест");
-            String seatsStyle = freeSeats == 0 ? "-fx-text-fill: #e74c3c;" :
-                    freeSeats < 10 ? "-fx-text-fill: #f39c12;" :
-                            "-fx-text-fill: #27ae60;";
-            seatsLabel.setStyle(seatsStyle + " -fx-font-size: 11;");
+            Label seatsLabel = new Label(freeSeats + " свободных мест");
+            String seatsClass = freeSeats == 0 ? "showtime-seats-busy" :
+                    freeSeats < 10 ? "showtime-seats-warning" : "showtime-seats-ok";
+            seatsLabel.getStyleClass().add(seatsClass);
 
             timeRow.getChildren().addAll(timeBtn, hallLabel, seatsLabel);
             timesBox.getChildren().add(timeRow);
@@ -326,8 +330,16 @@ public class CashierController implements Initializable {
         // Если у фильма нет сеансов на эту дату
         if (showtimesList.isEmpty()) {
             Label noShowtimesLabel = new Label("Нет сеансов");
-            noShowtimesLabel.setStyle("-fx-text-fill: #bdc3c7; -fx-font-size: 12;");
+            noShowtimesLabel.getStyleClass().add("showtime-empty");
             timesBox.getChildren().add(noShowtimesLabel);
+        }
+
+        Button openButton = new Button("Открыть продажу →");
+        openButton.getStyleClass().add("showtime-open");
+        if (!showtimesList.isEmpty()) {
+            openButton.setOnAction(e -> openTicketWindow(showtimesList.get(0)));
+        } else {
+            openButton.setDisable(true);
         }
 
         // Обработчик клика по карточке - используем effectively final переменную
@@ -339,7 +351,7 @@ public class CashierController implements Initializable {
             }
         });
 
-        card.getChildren().addAll(titleLabel, timesBox);
+        card.getChildren().addAll(titleLabel, timesBox, openButton);
         return card;
     }
 

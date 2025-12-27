@@ -15,7 +15,7 @@
         <VBox spacing="10" styleClass="app-header">
             <HBox spacing="20" alignment="CENTER_LEFT">
                 <VBox spacing="2">
-                    <Label text="Кинотеатр 'КиноСфера'" styleClass="header-title">
+                    <Label text="🎬 КиноСфера" styleClass="header-title">
                         <font>
                             <Font name="System Bold" size="20.0" />
                         </font>
@@ -33,16 +33,6 @@
                     <Button text="Выйти" onAction="#handleLogout" styleClass="button-danger"/>
                 </HBox>
             </HBox>
-
-            <MenuBar styleClass="app-menubar">
-                <Menu text="Файл">
-                    <MenuItem text="Выйти" onAction="#handleLogout"/>
-                </Menu>
-                <Menu text="Справка">
-                    <MenuItem text="О программе"/>
-                    <MenuItem text="Инструкция"/>
-                </Menu>
-            </MenuBar>
         </VBox>
     </top>
 
@@ -51,26 +41,31 @@
             <tabs>
                 <Tab text="Продажа билетов">
                     <ScrollPane fitToWidth="true" styleClass="content-scroll">
-                        <VBox spacing="8" styleClass="content-wrapper">
-                            <HBox spacing="8" alignment="CENTER_LEFT" styleClass="toolbar compact-toolbar">
-                                <Label text="Дата" styleClass="section-title"/>
-                                <DatePicker fx:id="datePicker" prefWidth="160"/>
-                                <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб."
-                                       styleClass="stat-chip"/>
-                            </HBox>
+                        <VBox spacing="10" styleClass="content-wrapper">
+                            <VBox spacing="8" styleClass="hero-card">
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <Label text="📅" styleClass="hero-icon"/>
+                                    <Label text="Дата:" styleClass="hero-title"/>
+                                    <DatePicker fx:id="datePicker" prefWidth="160"/>
+                                    <Button text="Сегодня" onAction="#handleToday" styleClass="button-secondary"/>
+                                    <Pane HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="totalSelectedLabel" text="Выберите сеанс для продажи"
+                                           styleClass="hero-subtitle"/>
+                                </HBox>
+                                <Label text="Выберите сеанс для продажи" styleClass="hero-hint"/>
+                            </VBox>
 
                             <VBox spacing="8">
                                 <Label text="Сеансы на выбранную дату" styleClass="section-title"/>
                                 <VBox spacing="6" styleClass="card compact-card">
                                     <ScrollPane prefHeight="420" styleClass="content-scroll">
                                         <TilePane fx:id="filmsTilePane"
-                                                  hgap="12" vgap="12"
-                                                  prefTileWidth="240"
-                                                  prefTileHeight="140"
-                                                  styleClass="film-tiles"/>
+                                                  hgap="16" vgap="16"
+                                                  prefTileWidth="260"
+                                                  prefTileHeight="170"
+                                                  styleClass="film-tiles film-grid"/>
                                     </ScrollPane>
                                 </VBox>
-                                <Label text="Нажмите на время сеанса, чтобы открыть продажу" styleClass="help-text"/>
                             </VBox>
                         </VBox>
                     </ScrollPane>
