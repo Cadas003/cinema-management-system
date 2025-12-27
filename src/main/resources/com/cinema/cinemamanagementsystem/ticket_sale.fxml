@@ -7,40 +7,30 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
-            prefHeight="560.0" prefWidth="880.0"
+            prefHeight="520.0" prefWidth="840.0"
             styleClass="app-root ticket-compact">
 
     <top>
-        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar compact-toolbar">
-            <Label text="Продажа и бронирование" styleClass="section-title"/>
-            <Pane HBox.hgrow="ALWAYS"/>
-            <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб." styleClass="stat-chip"/>
-        </HBox>
+        <VBox spacing="8" styleClass="content-wrapper compact-section">
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hero-card">
+                <Label text="🎟️ Продажа и бронирование" styleClass="hero-title"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб." styleClass="stat-chip"/>
+            </HBox>
+        </VBox>
     </top>
 
     <center>
-        <GridPane styleClass="compact-grid compact-grid-tight">
-            <padding>
-                <Insets top="10" right="12" bottom="12" left="12"/>
-            </padding>
-            <columnConstraints>
-                <ColumnConstraints percentWidth="68"/>
-                <ColumnConstraints percentWidth="32"/>
-            </columnConstraints>
-
-            <VBox spacing="8" GridPane.columnIndex="0">
+        <HBox spacing="12" styleClass="content-wrapper compact-section">
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
                 <Label text="Сеанс" styleClass="section-title"/>
-                <HBox spacing="10">
-                    <VBox spacing="4" styleClass="card compact-card" prefWidth="280">
-                        <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
-                        <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
-                        <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
-                    </VBox>
-                    <VBox spacing="4" styleClass="card compact-card" prefWidth="260">
-                        <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
-                        <Label text="Состояние мест обновляется автоматически" styleClass="help-text"/>
-                    </VBox>
-                </HBox>
+                <VBox spacing="6" styleClass="card compact-card">
+                    <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
+                    <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
+                    <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
+                    <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
+                    <Label text="Состояние мест обновляется автоматически" styleClass="help-text"/>
+                </VBox>
 
                 <Label text="Выбор места" styleClass="section-title"/>
                 <VBox spacing="6" styleClass="seat-card compact-card">
@@ -49,7 +39,7 @@
                 </VBox>
             </VBox>
 
-            <VBox spacing="8" GridPane.columnIndex="1">
+            <VBox spacing="8" prefWidth="260">
                 <VBox spacing="6" styleClass="sidebar-card compact-card">
                     <Label text="Клиент" styleClass="section-title"/>
                     <VBox spacing="6">
@@ -76,7 +66,7 @@
                     </VBox>
                 </VBox>
             </VBox>
-        </GridPane>
+        </HBox>
     </center>
 
 </BorderPane>
