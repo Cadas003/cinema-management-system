@@ -890,7 +890,23 @@ public class CashierController implements Initializable {
         return price;
     }
 
-    private record CustomerSelection(Customer customer, boolean isGuest) {}
+    private static class CustomerSelection {
+        private final Customer customer;
+        private final boolean isGuest;
+
+        private CustomerSelection(Customer customer, boolean isGuest) {
+            this.customer = customer;
+            this.isGuest = isGuest;
+        }
+
+        private Customer customer() {
+            return customer;
+        }
+
+        private boolean isGuest() {
+            return isGuest;
+        }
+    }
 
     // ===================== ОСТАЛЬНЫЕ МЕТОДЫ =====================
 
