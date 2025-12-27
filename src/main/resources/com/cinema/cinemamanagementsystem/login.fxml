@@ -76,22 +76,8 @@
                 </font>
             </Button>
 
-            <Label text="Тестовые данные:"
-                   styleClass="hint-label">
-                <font>
-                    <Font name="System" size="12.0" />
-                </font>
-            </Label>
-
-            <Label text="Администратор: SAV / hash12345"
-                   styleClass="hint-text">
-                <font>
-                    <Font name="System" size="12.0" />
-                </font>
-            </Label>
-
-            <Label text="Кассир: SAS / skrypnik1"
-                   styleClass="hint-text">
+            <Label text="Используйте корпоративную учетную запись"
+                   styleClass="help-text">
                 <font>
                     <Font name="System" size="12.0" />
                 </font>

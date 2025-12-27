@@ -11,14 +11,18 @@ import com.cinema.cinemamanagementsystem.models.Showtime;
 import com.cinema.cinemamanagementsystem.models.Ticket;
 import com.cinema.cinemamanagementsystem.models.User;
 import com.cinema.cinemamanagementsystem.services.BookingService;
+import com.cinema.cinemamanagementsystem.ui.OperationHistory;
+import com.cinema.cinemamanagementsystem.ui.OperationRecord;
+import com.cinema.cinemamanagementsystem.ui.UiDialogs;
+import com.cinema.cinemamanagementsystem.ui.ViewStateController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -27,9 +31,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.util.Duration;
+import javafx.animation.PauseTransition;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +55,14 @@ import java.util.stream.Collectors;
 public class TicketSaleController implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(TicketSaleController.class);
 
+    @FXML private BorderPane ticketSaleRoot;
     @FXML private Label totalSelectedLabel;
     @FXML private Label selectedFilmLabel;
     @FXML private Label selectedDateTimeLabel;
     @FXML private Label selectedHallLabel;
     @FXML private Label selectedPriceLabel;
     @FXML private GridPane seatGrid;
+    @FXML private StackPane seatStatePane;
     @FXML private RadioButton guestCustomerRadio;
     @FXML private RadioButton registeredCustomerRadio;
     @FXML private TextField registeredSearchField;
@@ -68,6 +80,8 @@ public class TicketSaleController implements Initializable {
     private Showtime selectedShowtime;
     private User currentUser;
     private java.util.Map<Integer, SeatCategory> categoryMap;
+    private ViewStateController seatStateController;
+    private PauseTransition customerSearchDebounce;
 
     public void setShowtime(Showtime showtime) {
         this.selectedShowtime = showtime;
@@ -82,11 +96,21 @@ public class TicketSaleController implements Initializable {
         guestCustomerRadio.setSelected(true);
         guestCustomerRadio.selectedProperty().addListener((obs, oldVal, newVal) -> updateCustomerMode());
         registeredCustomerRadio.selectedProperty().addListener((obs, oldVal, newVal) -> updateCustomerMode());
-        registeredSearchField.textProperty().addListener((obs, oldVal, newVal) -> filterRegisteredCustomers(newVal));
+        customerSearchDebounce = new PauseTransition(Duration.millis(280));
+        registeredSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            customerSearchDebounce.setOnFinished(event -> filterRegisteredCustomers(newVal));
+            customerSearchDebounce.playFromStart();
+        });
         registeredCustomerCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalSelected());
 
         sellTicketButton.setOnAction(e -> sellTickets());
         bookTicketButton.setOnAction(e -> bookTickets());
+        sellTicketButton.setTooltip(new Tooltip("Продать выбранные места (Enter / Ctrl+S)"));
+        bookTicketButton.setTooltip(new Tooltip("Забронировать выбранные места"));
+        sellTicketButton.setDefaultButton(true);
+
+        seatStateController = new ViewStateController(seatStatePane, seatGrid);
+        setupAccelerators();
     }
 
     public void initializeData() {
@@ -94,7 +118,7 @@ public class TicketSaleController implements Initializable {
         loadRegisteredCustomers();
         updateCustomerMode();
         updateShowtimeInfo();
-        renderSeats();
+        loadSeatsAsync();
         updateTotalSelected();
     }
 
@@ -136,6 +160,35 @@ public class TicketSaleController implements Initializable {
             return;
         }
 
+        seatStateController.showLoading("Загружаем схему зала");
+        Task<SeatLoadResult> task = new Task<>() {
+            @Override
+            protected SeatLoadResult call() {
+                List<Seat> seats = showtimeDAO.getSeatsForShowtime(selectedShowtime.getShowtimeId());
+                List<Integer> takenSeats = showtimeDAO.getTakenSeats(selectedShowtime.getShowtimeId());
+                return new SeatLoadResult(seats, takenSeats);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            SeatLoadResult result = task.getValue();
+            renderSeatsGrid(result.seats, result.takenSeats);
+        });
+        task.setOnFailed(event -> seatStateController.showError(
+                "Не удалось загрузить места",
+                this::loadSeatsAsync
+        ));
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void loadSeatsAsync() {
+        renderSeats();
+    }
+
+    private void renderSeatsGrid(List<Seat> seats, List<Integer> takenSeats) {
         seatGrid.getChildren().clear();
         selectedSeatIds.clear();
 
@@ -143,10 +196,13 @@ public class TicketSaleController implements Initializable {
         seatGrid.getRowConstraints().clear();
         seatGrid.getColumnConstraints().clear();
 
-        List<Seat> seats = showtimeDAO.getSeatsForShowtime(selectedShowtime.getShowtimeId());
-        List<Integer> takenSeats = showtimeDAO.getTakenSeats(selectedShowtime.getShowtimeId());
-
-        if (seats.isEmpty()) {
+        if (seats == null || seats.isEmpty()) {
+            seatStateController.showEmpty(
+                    "Нет схемы зала",
+                    "Для выбранного сеанса места не настроены",
+                    "Обновить",
+                    this::loadSeatsAsync
+            );
             return;
         }
 
@@ -167,9 +223,12 @@ public class TicketSaleController implements Initializable {
                 .collect(Collectors.toList());
 
         if (availableSeats.isEmpty()) {
-            Label noSeatsLabel = new Label("Все места заняты");
-            noSeatsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-            seatGrid.add(noSeatsLabel, 0, 0, 2, 1);
+            seatStateController.showEmpty(
+                    "Все места заняты",
+                    "Попробуйте выбрать другой сеанс",
+                    null,
+                    null
+            );
             return;
         }
 
@@ -281,6 +340,7 @@ public class TicketSaleController implements Initializable {
         int preferredWidth = (maxCol + 1) * 34 + 24;
         int preferredHeight = (maxRow + 2) * 34 + 24;
         seatGrid.setPrefSize(preferredWidth, preferredHeight);
+        seatStateController.showContent();
     }
 
     private void updateSeatButtonStyle(Button seatButton, boolean isSelected, String color) {
@@ -345,18 +405,11 @@ public class TicketSaleController implements Initializable {
             }
 
             if (!soldTickets.isEmpty()) {
-                showAlert("Успех",
-                        String.format("Продано %d билетов. Номера: %s",
-                                soldTickets.size(),
-                                soldTickets.stream()
-                                        .map(t -> "#" + t.getTicketId())
-                                        .collect(Collectors.joining(", "))),
-                        Alert.AlertType.INFORMATION);
-                clearSaleForm();
+                handleSaleSuccess(soldTickets);
             }
         } catch (Exception e) {
             logger.error("Ошибка при продаже билетов: {}", e.getMessage());
-            showAlert("Ошибка", e.getMessage(), Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(getStage(), "Ошибка", e.getMessage());
         }
     }
 
@@ -381,18 +434,13 @@ public class TicketSaleController implements Initializable {
             }
 
             if (!bookedTickets.isEmpty()) {
-                showAlert("Успех",
-                        String.format("Создано %d бронирований. Номера: %s",
-                                bookedTickets.size(),
-                                bookedTickets.stream()
-                                        .map(t -> "#" + t.getTicketId())
-                                        .collect(Collectors.joining(", "))),
-                        Alert.AlertType.INFORMATION);
+                UiDialogs.successToast(getStage(),
+                        String.format("Создано %d бронирований", bookedTickets.size()));
                 clearSaleForm();
             }
         } catch (Exception e) {
             logger.error("Ошибка при бронировании: {}", e.getMessage());
-            showAlert("Ошибка", e.getMessage(), Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(getStage(), "Ошибка", e.getMessage());
         }
     }
 
@@ -418,7 +466,7 @@ public class TicketSaleController implements Initializable {
     private void clearSaleForm() {
         registeredCustomerCombo.setValue(null);
         selectedSeatIds.clear();
-        renderSeats();
+        loadSeatsAsync();
         updateTotalSelected();
     }
 
@@ -480,12 +528,67 @@ public class TicketSaleController implements Initializable {
         return price;
     }
 
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+
+    private void handleSaleSuccess(List<Ticket> soldTickets) {
+        double totalAmount = soldTickets.stream()
+                .mapToDouble(Ticket::getFinalPrice)
+                .sum();
+        String ticketIds = soldTickets.stream()
+                .map(t -> "#" + t.getTicketId())
+                .collect(Collectors.joining(", "));
+
+        OperationHistory.addRecord(new OperationRecord(
+                LocalDateTime.now(),
+                "Продажа билетов",
+                totalAmount,
+                ticketIds
+        ));
+
+        UiDialogs.showSaleSuccess(
+                getStage(),
+                new UiDialogs.SaleSummary(
+                        String.format("%.2f", totalAmount),
+                        "0.00",
+                        soldTickets.get(0).getTicketId() + "-" + LocalDateTime.now().getMinute(),
+                        ticketIds
+                ),
+                this::clearSaleForm,
+                () -> UiDialogs.successToast(getStage(), "Откройте вкладку «Возвраты» для истории")
+        );
+    }
+
+    private void setupAccelerators() {
+        ticketSaleRoot.sceneProperty().addListener((obs, oldScene, scene) -> {
+            if (scene == null) {
+                return;
+            }
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER), this::sellTickets);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), this::sellTickets);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN), registeredSearchField::requestFocus);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), this::loadSeatsAsync);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
+                if (getStage() != null) {
+                    getStage().close();
+                }
+            });
+        });
+    }
+
+    private Stage getStage() {
+        if (ticketSaleRoot != null && ticketSaleRoot.getScene() != null) {
+            return (Stage) ticketSaleRoot.getScene().getWindow();
+        }
+        return null;
+    }
+
+    private static class SeatLoadResult {
+        private final List<Seat> seats;
+        private final List<Integer> takenSeats;
+
+        private SeatLoadResult(List<Seat> seats, List<Integer> takenSeats) {
+            this.seats = seats == null ? new ArrayList<>() : seats;
+            this.takenSeats = takenSeats == null ? new ArrayList<>() : takenSeats;
+        }
     }
 
     private static class CustomerSelection {

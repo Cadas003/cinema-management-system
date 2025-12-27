@@ -33,10 +33,6 @@ public class LoginController {
         // Устанавливаем обработчик нажатия Enter
         passwordField.setOnAction(event -> handleLogin());
         loginButton.setOnAction(event -> handleLogin());
-
-        // Тестовые данные (можно удалить в продакшене)
-        loginField.setText("SAV");
-        passwordField.setText("hash12345");
     }
 
     @FXML

@@ -3,48 +3,71 @@ package com.cinema.cinemamanagementsystem.controllers;
 import com.cinema.cinemamanagementsystem.dao.*;
 import com.cinema.cinemamanagementsystem.models.*;
 import com.cinema.cinemamanagementsystem.services.BookingService;
+import com.cinema.cinemamanagementsystem.ui.ConnectionStatusMonitor;
+import com.cinema.cinemamanagementsystem.ui.UiDialogs;
+import com.cinema.cinemamanagementsystem.ui.ViewStateController;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
-import javafx.stage.FileChooser;
-import javafx.animation.Timeline;
-import javafx.animation.KeyFrame;
-import javafx.util.Duration;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 public class AdminController implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     // Компоненты UI
+    @FXML private BorderPane adminRoot;
     @FXML private TabPane mainTabPane;
     @FXML private Label welcomeLabel;
     @FXML private Label currentTimeLabel;
+    @FXML private Label connectionStatusLabel;
 
     // Вкладка фильмы
     @FXML private TableView<Film> filmsTable;
@@ -53,9 +76,11 @@ public class AdminController implements Initializable {
     @FXML private TableColumn<Film, String> filmGenreColumn;
     @FXML private TableColumn<Film, Integer> filmDurationColumn;
     @FXML private TextField filmSearchField;
+    @FXML private ComboBox<String> filmGenreFilter;
     @FXML private Button addFilmButton;
     @FXML private Button editFilmButton;
     @FXML private Button deleteFilmButton;
+    @FXML private StackPane filmsStatePane;
 
     // Вкладка сеансы
     @FXML private TableView<Showtime> showtimesTable;
@@ -70,6 +95,7 @@ public class AdminController implements Initializable {
     @FXML private ComboBox<String> timeComboBox;
     @FXML private TextField basePriceField;
     @FXML private Button addShowtimeButton;
+    @FXML private StackPane showtimesStatePane;
 
     // Вкладка отчеты
     @FXML private DatePicker reportStartDate;
@@ -80,6 +106,7 @@ public class AdminController implements Initializable {
     @FXML private Button exportReportButton;
     @FXML private Label totalRevenueLabel;
     @FXML private Label totalTicketsLabel;
+    @FXML private StackPane reportStatePane;
 
     private Stage primaryStage;
     private User currentUser;
@@ -89,6 +116,12 @@ public class AdminController implements Initializable {
 
     private ObservableList<Film> filmsList = FXCollections.observableArrayList();
     private ObservableList<Showtime> showtimesList = FXCollections.observableArrayList();
+    private List<Film> allFilms = new ArrayList<>();
+    private ViewStateController filmsStateController;
+    private ViewStateController showtimesStateController;
+    private ViewStateController reportStateController;
+    private PauseTransition filmSearchDebounce;
+    private final ConnectionStatusMonitor connectionStatusMonitor = new ConnectionStatusMonitor();
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
@@ -104,6 +137,8 @@ public class AdminController implements Initializable {
         setupShowtimesTab();
         setupReportsTab();
         startClock();
+        setupStateControllers();
+        setupAccelerators();
     }
 
     public void initializeData() {
@@ -114,6 +149,7 @@ public class AdminController implements Initializable {
         loadShowtimes();
         loadHalls();
         loadFilmsForComboBox();
+        connectionStatusMonitor.attach(connectionStatusLabel);
     }
 
     private void setupFilmsTab() {
@@ -130,10 +166,16 @@ public class AdminController implements Initializable {
         editFilmButton.setOnAction(e -> editSelectedFilm());
         deleteFilmButton.setOnAction(e -> deleteSelectedFilm());
 
-        // Поиск фильмов
+        addFilmButton.setTooltip(new Tooltip("Добавить новый фильм (Ctrl+S)"));
+        editFilmButton.setTooltip(new Tooltip("Редактировать выбранный фильм"));
+        deleteFilmButton.setTooltip(new Tooltip("Удалить выбранный фильм"));
+
+        filmSearchDebounce = new PauseTransition(Duration.millis(280));
         filmSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            searchFilms(newValue);
+            filmSearchDebounce.setOnFinished(event -> applyFilmFilters());
+            filmSearchDebounce.playFromStart();
         });
+        filmGenreFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilmFilters());
     }
 
     private void setupShowtimesTab() {
@@ -159,6 +201,7 @@ public class AdminController implements Initializable {
         );
 
         addShowtimeButton.setOnAction(e -> addShowtime());
+        addShowtimeButton.setTooltip(new Tooltip("Создать сеанс (Ctrl+S)"));
     }
 
     private void setupReportsTab() {
@@ -179,11 +222,68 @@ public class AdminController implements Initializable {
     }
 
     private void loadFilms() {
-        filmsList.setAll(filmDAO.getAllFilms());
+        filmsStateController.showLoading("Загружаем список фильмов");
+        Task<List<Film>> task = new Task<>() {
+            @Override
+            protected List<Film> call() {
+                return filmDAO.getAllFilms();
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            allFilms = new ArrayList<>(task.getValue());
+            updateFilmGenreFilter();
+            applyFilmFilters();
+            if (filmsList.isEmpty()) {
+                filmsStateController.showEmpty(
+                        "Фильмы отсутствуют",
+                        "Добавьте первый фильм в каталог",
+                        "Добавить фильм",
+                        this::showAddFilmDialog
+                );
+            } else {
+                filmsStateController.showContent();
+            }
+        });
+        task.setOnFailed(event -> filmsStateController.showError(
+                "Не удалось загрузить фильмы",
+                this::loadFilms
+        ));
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void loadShowtimes() {
-        showtimesList.setAll(showtimeDAO.getAllShowtimes());
+        showtimesStateController.showLoading("Загружаем расписание");
+        Task<List<Showtime>> task = new Task<>() {
+            @Override
+            protected List<Showtime> call() {
+                return showtimeDAO.getAllShowtimes();
+            }
+        };
+        task.setOnSucceeded(event -> {
+            showtimesList.setAll(task.getValue());
+            if (showtimesList.isEmpty()) {
+                showtimesStateController.showEmpty(
+                        "Сеансы отсутствуют",
+                        "Добавьте сеанс, чтобы открыть продажи",
+                        "Создать сеанс",
+                        this::addShowtime
+                );
+            } else {
+                showtimesStateController.showContent();
+            }
+        });
+        task.setOnFailed(event -> showtimesStateController.showError(
+                "Не удалось загрузить сеансы",
+                this::loadShowtimes
+        ));
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void loadHalls() {
@@ -196,11 +296,64 @@ public class AdminController implements Initializable {
         filmComboBox.getItems().addAll(filmDAO.getAllFilms());
     }
 
-    private void searchFilms(String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            loadFilms();
+    private void applyFilmFilters() {
+        String searchText = filmSearchField.getText() == null ? "" : filmSearchField.getText().trim().toLowerCase();
+        String selectedGenre = filmGenreFilter.getValue();
+
+        List<Film> filtered = allFilms.stream()
+                .filter(film -> {
+                    boolean matchesSearch = searchText.isEmpty()
+                            || (film.getTitle() != null && film.getTitle().toLowerCase().contains(searchText))
+                            || (film.getGenreName() != null && film.getGenreName().toLowerCase().contains(searchText));
+                    boolean matchesGenre = selectedGenre == null || selectedGenre.equals("Все жанры")
+                            || (film.getGenreName() != null && film.getGenreName().equalsIgnoreCase(selectedGenre));
+                    return matchesSearch && matchesGenre;
+                })
+                .collect(Collectors.toList());
+
+        filmsList.setAll(filtered);
+        if (filtered.isEmpty()) {
+            filmsStateController.showEmpty(
+                    "Нет результатов",
+                    "Попробуйте изменить условия поиска",
+                    "Сбросить фильтры",
+                    this::resetFilmFilters
+            );
         } else {
-            filmsList.setAll(filmDAO.searchFilms(searchText));
+            filmsStateController.showContent();
+        }
+    }
+
+    private void resetFilmFilters() {
+        filmSearchField.clear();
+        if (filmGenreFilter.getItems().contains("Все жанры")) {
+            filmGenreFilter.setValue("Все жанры");
+        }
+        filmsList.setAll(allFilms);
+        if (filmsList.isEmpty()) {
+            filmsStateController.showEmpty(
+                    "Фильмы отсутствуют",
+                    "Добавьте первый фильм в каталог",
+                    "Добавить фильм",
+                    this::showAddFilmDialog
+            );
+        } else {
+            filmsStateController.showContent();
+        }
+    }
+
+    private void updateFilmGenreFilter() {
+        List<String> genres = allFilms.stream()
+                .map(Film::getGenreName)
+                .filter(genre -> genre != null && !genre.isBlank())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        filmGenreFilter.getItems().clear();
+        filmGenreFilter.getItems().add("Все жанры");
+        filmGenreFilter.getItems().addAll(genres);
+        if (filmGenreFilter.getValue() == null) {
+            filmGenreFilter.setValue("Все жанры");
         }
     }
 
@@ -271,7 +424,7 @@ public class AdminController implements Initializable {
                     // Здесь нужно преобразовать жанр в ID
                     return film;
                 } catch (NumberFormatException e) {
-                    showAlert("Ошибка", "Некорректная длительность фильма", Alert.AlertType.ERROR);
+                    UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Некорректная длительность фильма");
                     return null;
                 }
             }
@@ -280,10 +433,10 @@ public class AdminController implements Initializable {
 
         dialog.showAndWait().ifPresent(film -> {
             if (filmDAO.addFilm(film)) {
-                showAlert("Успех", "Фильм успешно добавлен", Alert.AlertType.INFORMATION);
+                UiDialogs.successToast(primaryStage, "Фильм успешно добавлен");
                 loadFilms();
             } else {
-                showAlert("Ошибка", "Не удалось добавить фильм", Alert.AlertType.ERROR);
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось добавить фильм");
             }
         });
     }
@@ -291,7 +444,7 @@ public class AdminController implements Initializable {
     private void editSelectedFilm() {
         Film selected = filmsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert("Предупреждение", "Выберите фильм для редактирования", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Редактирование", "Выберите фильм для редактирования");
             return;
         }
         // Реализация редактирования фильма
@@ -300,25 +453,21 @@ public class AdminController implements Initializable {
     private void deleteSelectedFilm() {
         Film selected = filmsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert("Предупреждение", "Выберите фильм для удаления", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Удаление", "Выберите фильм для удаления");
             return;
         }
 
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Подтверждение удаления");
-        confirmAlert.setHeaderText("Удалить фильм '" + selected.getTitle() + "'?");
-        confirmAlert.setContentText("Это действие нельзя отменить.");
-
-        confirmAlert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                if (filmDAO.deleteFilm(selected.getFilmId())) {
-                    showAlert("Успех", "Фильм успешно удален", Alert.AlertType.INFORMATION);
-                    loadFilms();
-                } else {
-                    showAlert("Ошибка", "Не удалось удалить фильм", Alert.AlertType.ERROR);
-                }
+        if (UiDialogs.confirmDialog(primaryStage,
+                "Подтверждение удаления",
+                "Удалить фильм '" + selected.getTitle() + "'? Это действие нельзя отменить.",
+                "Удалить")) {
+            if (filmDAO.deleteFilm(selected.getFilmId())) {
+                UiDialogs.successToast(primaryStage, "Фильм успешно удален");
+                loadFilms();
+            } else {
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось удалить фильм");
             }
-        });
+        }
     }
 
     private void addShowtime() {
@@ -329,7 +478,7 @@ public class AdminController implements Initializable {
             java.time.LocalDate date = showtimeDatePicker.getValue();
 
             if (selectedFilm == null || hall == null || date == null || time == null) {
-                showAlert("Предупреждение", "Заполните все поля", Alert.AlertType.WARNING);
+                UiDialogs.showInfoDialog(primaryStage, "Заполните форму", "Укажите все поля сеанса");
                 return;
             }
 
@@ -345,7 +494,18 @@ public class AdminController implements Initializable {
             int hallId = getHallIdFromName(hall);
 
             if (showtimeDAO.hasTimeConflict(hallId, dateTime, endTime, null)) {
-                showAlert("Ошибка", "В этом зале уже есть сеанс в выбранное время", Alert.AlertType.ERROR);
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "В этом зале уже есть сеанс в выбранное время");
+                return;
+            }
+
+            double basePrice;
+            try {
+                basePrice = Double.parseDouble(basePriceField.getText().trim());
+                if (basePrice <= 0) {
+                    throw new NumberFormatException("negative");
+                }
+            } catch (NumberFormatException e) {
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Укажите корректную базовую цену");
                 return;
             }
 
@@ -354,20 +514,20 @@ public class AdminController implements Initializable {
             showtime.setFilmId(selectedFilm.getFilmId());
             showtime.setHallId(hallId);
             showtime.setDateTime(dateTime);
-            showtime.setBasePrice(Double.parseDouble(basePriceField.getText()));
+            showtime.setBasePrice(basePrice);
             // Здесь нужно определить rule_id по времени
 
             if (showtimeDAO.addShowtime(showtime)) {
-                showAlert("Успех", "Сеанс успешно добавлен", Alert.AlertType.INFORMATION);
+                UiDialogs.successToast(primaryStage, "Сеанс успешно добавлен");
                 loadShowtimes();
                 clearShowtimeForm();
             } else {
-                showAlert("Ошибка", "Не удалось добавить сеанс", Alert.AlertType.ERROR);
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось добавить сеанс");
             }
 
         } catch (Exception e) {
             logger.error("Ошибка при добавлении сеанса: {}", e.getMessage());
-            showAlert("Ошибка", "Произошла ошибка: " + e.getMessage(), Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Произошла ошибка: " + e.getMessage());
         }
     }
 
@@ -395,12 +555,12 @@ public class AdminController implements Initializable {
         java.time.LocalDate endDate = reportEndDate.getValue();
 
         if (startDate == null || endDate == null) {
-            showAlert("Предупреждение", "Выберите период отчета", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Отчет", "Выберите период отчета");
             return;
         }
 
         if (startDate.isAfter(endDate)) {
-            showAlert("Ошибка", "Начальная дата не может быть позже конечной", Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Начальная дата не может быть позже конечной");
             return;
         }
 
@@ -427,6 +587,12 @@ public class AdminController implements Initializable {
         // Реализация отчета по продажам
         totalRevenueLabel.setText("Общая выручка: рассчитывается...");
         totalTicketsLabel.setText("Продано билетов: рассчитывается...");
+        reportStateController.showEmpty(
+                "Отчет в процессе",
+                "Данные отчета появятся после подключения аналитики",
+                null,
+                null
+        );
     }
 
     private void generateFilmPopularityReport(java.time.LocalDate startDate, java.time.LocalDate endDate) {
@@ -452,7 +618,7 @@ public class AdminController implements Initializable {
         File file = fileChooser.showSaveDialog(primaryStage);
         if (file != null) {
             // Логика экспорта
-            showAlert("Успех", "Отчет успешно экспортирован", Alert.AlertType.INFORMATION);
+            UiDialogs.successToast(primaryStage, "Отчет успешно экспортирован");
         }
     }
 
@@ -465,13 +631,6 @@ public class AdminController implements Initializable {
         clock.play();
     }
 
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     @FXML
     private void handleLogout() {
@@ -508,5 +667,52 @@ public class AdminController implements Initializable {
                 primaryStage.close();
             }
         });
+    }
+
+    private void setupStateControllers() {
+        filmsStateController = new ViewStateController(filmsStatePane, filmsTable);
+        showtimesStateController = new ViewStateController(showtimesStatePane, showtimesTable);
+        reportStateController = new ViewStateController(reportStatePane, reportTable);
+        reportStateController.showEmpty(
+                "Нет данных",
+                "Сформируйте отчет, чтобы увидеть аналитику",
+                "Сформировать",
+                this::generateReport
+        );
+    }
+
+    private void setupAccelerators() {
+        adminRoot.sceneProperty().addListener((obs, oldScene, scene) -> {
+            if (scene == null) {
+                return;
+            }
+
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), this::reloadData);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN), this::focusSearch);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), this::handlePrimaryAction);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ESCAPE), this::handleExit);
+        });
+    }
+
+    private void reloadData() {
+        loadFilms();
+        loadShowtimes();
+    }
+
+    private void focusSearch() {
+        if (mainTabPane.getSelectionModel().getSelectedIndex() == 0) {
+            filmSearchField.requestFocus();
+        }
+    }
+
+    private void handlePrimaryAction() {
+        int selectedIndex = mainTabPane.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == 0) {
+            showAddFilmDialog();
+        } else if (selectedIndex == 1) {
+            addShowtime();
+        } else if (selectedIndex == 2) {
+            generateReport();
+        }
     }
 }

@@ -5,6 +5,19 @@
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
     -fx-background-color: linear-gradient(to bottom, #f8f9fc, #eef2f8);
     -fx-text-fill: #1f2a44;
+
+    /* UI tokens */
+    -color-bg: #f6f7fb;
+    -color-surface: #ffffff;
+    -color-elevated: #f2f4ff;
+    -color-primary: #3f6ae0;
+    -color-primary-dark: #345ed1;
+    -color-success: #2fa36a;
+    -color-warning: #f0a33c;
+    -color-danger: #e2554f;
+    -color-text-primary: #1f2a44;
+    -color-text-muted: #6b7694;
+    -color-border: #d0d7de;
 }
 
 .app-header {
@@ -39,6 +52,25 @@
 .app-footer {
     -fx-background-color: #ecf0f1;
     -fx-padding: 8 16;
+}
+
+.status-bar {
+    -fx-background-color: #eef2f8;
+}
+
+.status-indicator {
+    -fx-padding: 2 8;
+    -fx-background-radius: 10;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.status-online {
+    -fx-background-color: #2fa36a;
+}
+
+.status-offline {
+    -fx-background-color: #e2554f;
 }
 
 .status-ready {
@@ -314,16 +346,16 @@
 }
 
 .button-primary {
-    -fx-background-color: #3f6ae0;
+    -fx-background-color: -color-primary;
     -fx-text-fill: white;
 }
 
 .button-primary:hover {
-    -fx-background-color: #345ed1;
+    -fx-background-color: -color-primary-dark;
 }
 
 .button-success {
-    -fx-background-color: #3ba87b;
+    -fx-background-color: -color-success;
     -fx-text-fill: white;
 }
 
@@ -332,7 +364,7 @@
 }
 
 .button-danger {
-    -fx-background-color: #e2554f;
+    -fx-background-color: -color-danger;
     -fx-text-fill: white;
 }
 
@@ -341,7 +373,7 @@
 }
 
 .button-warning {
-    -fx-background-color: #f0b24d;
+    -fx-background-color: -color-warning;
     -fx-text-fill: white;
 }
 
@@ -355,7 +387,7 @@
 .text-field, .combo-box, .date-picker {
     -fx-background-radius: 8;
     -fx-border-radius: 8;
-    -fx-border-color: #d0d7de;
+    -fx-border-color: -color-border;
     -fx-font-size: 12px;
 }
 
@@ -389,6 +421,73 @@
     -fx-background-color: #1d2940;
     -fx-background-radius: 12;
     -fx-padding: 12;
+}
+
+/* ===========================
+   STATE / LOADING
+   =========================== */
+.state-pane {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+    -fx-border-color: #e1e8f2;
+    -fx-border-radius: 12;
+}
+
+.state-icon {
+    -fx-font-size: 26px;
+}
+
+.state-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-primary;
+}
+
+.state-message {
+    -fx-text-fill: -color-text-muted;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.state-action {
+    -fx-padding: 6 16;
+}
+
+.loading-indicator {
+    -fx-progress-color: -color-primary;
+}
+
+.toast {
+    -fx-background-color: #1f2a44;
+    -fx-text-fill: white;
+    -fx-padding: 8 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+}
+
+.toast-success {
+    -fx-background-color: #2fa36a;
+}
+
+.toast-error {
+    -fx-background-color: #e2554f;
+}
+
+.success-dialog {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f4f6ff);
+    -fx-background-radius: 18;
+}
+
+.success-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-primary;
+}
+
+.success-meta {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 12px;
 }
 
 .seat {
