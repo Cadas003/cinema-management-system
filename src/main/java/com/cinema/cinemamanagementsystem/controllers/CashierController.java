@@ -161,6 +161,7 @@ public class CashierController implements Initializable {
         immediateSaleRadio.setToggleGroup(saleTypeGroup);
         bookingRadio.setToggleGroup(saleTypeGroup);
         immediateSaleRadio.setSelected(true);
+        saleTypeGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
 
         // Настройка DatePicker
         setupDatePicker();
@@ -173,6 +174,10 @@ public class CashierController implements Initializable {
         customerPhoneField.textProperty().addListener((obs, oldV, newV) -> {
             if (!newV.matches("\\+?\\d*")) customerPhoneField.setText(oldV);
         });
+
+        customerNameField.textProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
+        customerPhoneField.textProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
+        customerEmailField.textProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
 
         // Обновление суммы
         updateTotalSelected();
@@ -645,15 +650,22 @@ public class CashierController implements Initializable {
 
     private void updateTotalSelected() {
         int count = selectedSeatIds.size();
-        double pricePerTicket = selectedShowtime != null ? selectedShowtime.getFinalPrice() : 0;
+        double pricePerTicket = 0;
+        if (selectedShowtime != null) {
+            boolean hasCustomer = hasCustomerData();
+            pricePerTicket = bookingService.calculateFinalPrice(
+                    selectedShowtime.getShowtimeId(),
+                    isBookingSelected(),
+                    hasCustomer
+            );
+        }
         double total = count * pricePerTicket;
 
         totalSelectedLabel.setText(String.format("Выбрано: %d мест | Итого: %.2f руб.", count, total));
 
         // Активируем/деактивируем кнопки продажи
-        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty() &&
-                !customerNameField.getText().trim().isEmpty() &&
-                !customerPhoneField.getText().trim().isEmpty();
+        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty()
+                && isCustomerInputValid();
 
         sellTicketButton.setDisable(!canSell);
         bookTicketButton.setDisable(!canSell);
@@ -753,8 +765,9 @@ public class CashierController implements Initializable {
     private void validateSaleForm() {
         if (selectedShowtime == null) throw new IllegalArgumentException("Выберите сеанс");
         if (selectedSeatIds.isEmpty()) throw new IllegalArgumentException("Выберите места");
-        if (customerNameField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите имя клиента");
-        if (customerPhoneField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите телефон");
+        if (!isCustomerInputValid()) {
+            throw new IllegalArgumentException("Для регистрации нужны имя и телефон (или оставьте поля пустыми)");
+        }
 
         // Проверяем, что выбранные места еще свободны
         List<Integer> takenSeats = showtimeDAO.getTakenSeats(selectedShowtime.getShowtimeId());
@@ -780,7 +793,27 @@ public class CashierController implements Initializable {
         int freeSeats = totalSeats - takenSeats;
 
         selectedPriceLabel.setText(String.format("Цена: %.2f руб. | Свободно: %d/%d",
-                selectedShowtime.getFinalPrice(), freeSeats, totalSeats));
+                bookingService.calculateFinalPrice(
+                        selectedShowtime.getShowtimeId(),
+                        isBookingSelected(),
+                        hasCustomerData()
+                ),
+                freeSeats, totalSeats));
+    }
+
+    private boolean hasCustomerData() {
+        return !customerNameField.getText().trim().isEmpty()
+                && !customerPhoneField.getText().trim().isEmpty();
+    }
+
+    private boolean isCustomerInputValid() {
+        boolean hasName = !customerNameField.getText().trim().isEmpty();
+        boolean hasPhone = !customerPhoneField.getText().trim().isEmpty();
+        return (hasName && hasPhone) || (!hasName && !hasPhone);
+    }
+
+    private boolean isBookingSelected() {
+        return bookingRadio.isSelected();
     }
 
     private void clearFilmSelection() {
