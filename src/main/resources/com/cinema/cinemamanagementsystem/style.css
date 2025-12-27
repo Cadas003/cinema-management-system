@@ -166,24 +166,24 @@
    ОКНО АВТОРИЗАЦИИ
    =========================== */
 .login-pane {
-    -fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe);
+    -fx-background-color: linear-gradient(to bottom right, #232a5a, #6a3aa8);
 }
 
 .login-form {
     -fx-background-color: white;
     -fx-background-radius: 16;
-    -fx-padding: 35;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 25, 0.3, 0, 4);
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 24, 0.3, 0, 4);
 }
 
 .login-title {
     -fx-text-fill: white;
-    -fx-font-size: 26px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
 }
 
 .login-subtitle {
-    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-text-fill: rgba(255,255,255,0.75);
     -fx-font-size: 14px;
 }
 
@@ -202,20 +202,20 @@
 }
 
 .login-button {
-    -fx-pref-height: 42px;
-    -fx-background-radius: 8;
-    -fx-background-color: #4caf50;
+    -fx-pref-height: 40px;
+    -fx-background-radius: 10;
+    -fx-background-color: #3f6ae0;
     -fx-text-fill: white;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
 .login-button:hover {
-    -fx-background-color: #43a047;
+    -fx-background-color: #345ed1;
 }
 
 .login-button:pressed {
-    -fx-background-color: #388e3c;
+    -fx-background-color: #2f53ba;
 }
 
 .error-label {
