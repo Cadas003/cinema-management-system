@@ -334,14 +334,6 @@ public class CashierController implements Initializable {
             timesBox.getChildren().add(noShowtimesLabel);
         }
 
-        Button openButton = new Button("Открыть продажу →");
-        openButton.getStyleClass().add("showtime-open");
-        if (!showtimesList.isEmpty()) {
-            openButton.setOnAction(e -> openTicketWindow(showtimesList.get(0)));
-        } else {
-            openButton.setDisable(true);
-        }
-
         // Обработчик клика по карточке - используем effectively final переменную
         card.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) { // Двойной клик
@@ -351,7 +343,7 @@ public class CashierController implements Initializable {
             }
         });
 
-        card.getChildren().addAll(titleLabel, timesBox, openButton);
+        card.getChildren().addAll(titleLabel, timesBox);
         return card;
     }
 
