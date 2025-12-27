@@ -60,6 +60,9 @@ public class CashierController implements Initializable {
     @FXML private TextField customerNameField;
     @FXML private TextField customerPhoneField;
     @FXML private TextField customerEmailField;
+    @FXML private RadioButton guestCustomerRadio;
+    @FXML private RadioButton registeredCustomerRadio;
+    @FXML private ComboBox<Customer> registeredCustomerCombo;
     @FXML private RadioButton immediateSaleRadio;
     @FXML private RadioButton bookingRadio;
     @FXML private ComboBox<String> paymentMethodCombo;
@@ -105,6 +108,7 @@ public class CashierController implements Initializable {
     private ObservableList<Showtime> allShowtimesList = FXCollections.observableArrayList();
     private ObservableList<Ticket> bookingsList = FXCollections.observableArrayList();
     private ObservableList<Customer> customersList = FXCollections.observableArrayList();
+    private ObservableList<Customer> registeredCustomersList = FXCollections.observableArrayList();
 
     // Текущие выборы
     private LocalDate selectedDate;
@@ -143,6 +147,7 @@ public class CashierController implements Initializable {
         loadAllShowtimes();
         loadActiveBookings();
         loadCustomers();
+        loadRegisteredCustomers();
         loadPaymentMethods();
 
         // Устанавливаем сегодняшнюю дату
@@ -162,6 +167,17 @@ public class CashierController implements Initializable {
         bookingRadio.setToggleGroup(saleTypeGroup);
         immediateSaleRadio.setSelected(true);
 
+        ToggleGroup customerTypeGroup = new ToggleGroup();
+        guestCustomerRadio.setToggleGroup(customerTypeGroup);
+        registeredCustomerRadio.setToggleGroup(customerTypeGroup);
+        guestCustomerRadio.setSelected(true);
+
+        customerTypeGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            updateCustomerMode();
+            updateTotalSelected();
+        });
+        saleTypeGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> updateTotalSelected());
+
         // Настройка DatePicker
         setupDatePicker();
 
@@ -174,7 +190,10 @@ public class CashierController implements Initializable {
             if (!newV.matches("\\+?\\d*")) customerPhoneField.setText(oldV);
         });
 
+        registeredCustomerCombo.valueProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
+
         // Обновление суммы
+        updateCustomerMode();
         updateTotalSelected();
     }
 
@@ -416,6 +435,11 @@ public class CashierController implements Initializable {
         customersList.setAll(customerDAO.getAllCustomers());
     }
 
+    private void loadRegisteredCustomers() {
+        registeredCustomersList.setAll(customerDAO.getRegisteredCustomers());
+        registeredCustomerCombo.setItems(registeredCustomersList);
+    }
+
     private void loadPaymentMethods() {
         paymentMethodCombo.getItems().addAll("Банковская карта", "Наличные", "СБП");
         paymentMethodCombo.setValue("Банковская карта");
@@ -494,15 +518,6 @@ public class CashierController implements Initializable {
             seatGrid.getRowConstraints().add(rowConst);
         }
 
-        // ЭКРАН
-        Label screenLabel = new Label("Э К Р А Н");
-        screenLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: white; " +
-                "-fx-padding: 8px; -fx-background-color: #2c3e50; " +
-                "-fx-background-radius: 5;");
-        screenLabel.setMaxWidth(Double.MAX_VALUE);
-        screenLabel.setAlignment(Pos.CENTER);
-        seatGrid.add(screenLabel, 1, 0, maxCol, 1);
-
         // Подписи колонок (номера мест) - только для свободных мест
         for (int i = 0; i < availableColumns.size(); i++) {
             Label colLabel = new Label(String.valueOf(availableColumns.get(i)));
@@ -563,7 +578,7 @@ public class CashierController implements Initializable {
                 tooltipText.append("Ряд: ").append(rowNum).append("\n");
                 tooltipText.append("Место: ").append(colNum).append("\n");
                 tooltipText.append("Категория: ").append(categoryName).append("\n");
-                tooltipText.append("Цена: ").append(String.format("%.2f руб.", selectedShowtime.getFinalPrice()));
+                tooltipText.append("Цена: ").append(String.format("%.2f руб.", calculateTicketPrice()));
 
                 Tooltip tooltip = new Tooltip(tooltipText.toString());
                 tooltip.setStyle("-fx-font-size: 12px; -fx-font-weight: normal;");
@@ -645,18 +660,20 @@ public class CashierController implements Initializable {
 
     private void updateTotalSelected() {
         int count = selectedSeatIds.size();
-        double pricePerTicket = selectedShowtime != null ? selectedShowtime.getFinalPrice() : 0;
+        double pricePerTicket = selectedShowtime != null ? calculateTicketPrice() : 0;
         double total = count * pricePerTicket;
 
         totalSelectedLabel.setText(String.format("Выбрано: %d мест | Итого: %.2f руб.", count, total));
 
         // Активируем/деактивируем кнопки продажи
-        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty() &&
-                !customerNameField.getText().trim().isEmpty() &&
-                !customerPhoneField.getText().trim().isEmpty();
+        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty() && hasValidCustomerSelection();
 
         sellTicketButton.setDisable(!canSell);
         bookTicketButton.setDisable(!canSell);
+
+        if (selectedShowtime != null) {
+            updateShowtimeInfo();
+        }
     }
 
     // ===================== ПРОДАЖА И БРОНИРОВАНИЕ =====================
@@ -666,15 +683,15 @@ public class CashierController implements Initializable {
             validateSaleForm();
 
             List<Ticket> soldTickets = new ArrayList<>();
+            CustomerSelection selection = resolveCustomerSelection();
 
             for (Integer seatId : selectedSeatIds) {
                 Ticket ticket = bookingService.sellTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
-                        customerNameField.getText().trim(),
-                        customerPhoneField.getText().trim(),
-                        customerEmailField.getText().trim()
+                        selection.customer(),
+                        selection.isGuest()
                 );
 
                 if (ticket != null) {
@@ -706,15 +723,15 @@ public class CashierController implements Initializable {
             validateSaleForm();
 
             List<Ticket> bookedTickets = new ArrayList<>();
+            CustomerSelection selection = resolveCustomerSelection();
 
             for (Integer seatId : selectedSeatIds) {
                 Ticket ticket = bookingService.bookTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
-                        customerNameField.getText().trim(),
-                        customerPhoneField.getText().trim(),
-                        customerEmailField.getText().trim()
+                        selection.customer(),
+                        selection.isGuest()
                 );
 
                 if (ticket != null) {
@@ -753,8 +770,9 @@ public class CashierController implements Initializable {
     private void validateSaleForm() {
         if (selectedShowtime == null) throw new IllegalArgumentException("Выберите сеанс");
         if (selectedSeatIds.isEmpty()) throw new IllegalArgumentException("Выберите места");
-        if (customerNameField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите имя клиента");
-        if (customerPhoneField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите телефон");
+        if (!hasValidCustomerSelection()) {
+            throw new IllegalArgumentException("Выберите клиента или заполните данные гостя");
+        }
 
         // Проверяем, что выбранные места еще свободны
         List<Integer> takenSeats = showtimeDAO.getTakenSeats(selectedShowtime.getShowtimeId());
@@ -780,7 +798,7 @@ public class CashierController implements Initializable {
         int freeSeats = totalSeats - takenSeats;
 
         selectedPriceLabel.setText(String.format("Цена: %.2f руб. | Свободно: %d/%d",
-                selectedShowtime.getFinalPrice(), freeSeats, totalSeats));
+                calculateTicketPrice(), freeSeats, totalSeats));
     }
 
     private void clearFilmSelection() {
@@ -814,6 +832,7 @@ public class CashierController implements Initializable {
         customerNameField.clear();
         customerPhoneField.clear();
         customerEmailField.clear();
+        registeredCustomerCombo.setValue(null);
         selectedSeatIds.clear();
         updateTotalSelected();
 
@@ -821,6 +840,57 @@ public class CashierController implements Initializable {
             renderSeats();
         }
     }
+
+    private void updateCustomerMode() {
+        boolean isGuest = guestCustomerRadio.isSelected();
+        customerNameField.setDisable(!isGuest);
+        customerPhoneField.setDisable(!isGuest);
+        customerEmailField.setDisable(!isGuest);
+        registeredCustomerCombo.setDisable(isGuest);
+    }
+
+    private boolean hasValidCustomerSelection() {
+        if (guestCustomerRadio.isSelected()) {
+            return !customerNameField.getText().trim().isEmpty()
+                    && !customerPhoneField.getText().trim().isEmpty();
+        }
+
+        return registeredCustomerCombo.getValue() != null;
+    }
+
+    private CustomerSelection resolveCustomerSelection() {
+        if (guestCustomerRadio.isSelected()) {
+            Customer guest = new Customer();
+            guest.setName(customerNameField.getText().trim());
+            guest.setPhone(customerPhoneField.getText().trim());
+            guest.setEmail(customerEmailField.getText().trim());
+            guest.setRegistered(false);
+            return new CustomerSelection(guest, true);
+        }
+
+        return new CustomerSelection(registeredCustomerCombo.getValue(), false);
+    }
+
+    private double calculateTicketPrice() {
+        if (selectedShowtime == null) {
+            return 0;
+        }
+
+        double price = selectedShowtime.getFinalPrice();
+        if (bookingRadio.isSelected()) {
+            price *= (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
+        }
+
+        if (guestCustomerRadio.isSelected()) {
+            price *= (1 + DatabaseConfig.GUEST_SURCHARGE_RATE);
+        } else {
+            price *= (1 - DatabaseConfig.REGISTERED_DISCOUNT_RATE);
+        }
+
+        return price;
+    }
+
+    private record CustomerSelection(Customer customer, boolean isGuest) {}
 
     // ===================== ОСТАЛЬНЫЕ МЕТОДЫ =====================
 

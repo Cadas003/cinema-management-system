@@ -14,6 +14,8 @@ public class DatabaseConfig {
     // Константы бизнес-логики
     public static final int BOOKING_TIMEOUT_MINUTES = 30;
     public static final double BOOKING_SURCHARGE_RATE = 0.15;
+    public static final double REGISTERED_DISCOUNT_RATE = 0.10;
+    public static final double GUEST_SURCHARGE_RATE = 0.05;
 
     // Статусы билетов (должны соответствовать БД)
     public static class TicketStatus {

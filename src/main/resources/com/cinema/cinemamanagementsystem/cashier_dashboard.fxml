@@ -99,6 +99,12 @@
                                 <VBox spacing="10" GridPane.columnIndex="1">
                                     <VBox spacing="8" styleClass="sidebar-card">
                                         <Label text="Клиент" styleClass="section-title"/>
+                                        <VBox spacing="6">
+                                            <RadioButton fx:id="guestCustomerRadio" text="Гость" selected="true"/>
+                                            <RadioButton fx:id="registeredCustomerRadio" text="Зарегистрированный клиент"/>
+                                        </VBox>
+                                        <ComboBox fx:id="registeredCustomerCombo" promptText="Выберите клиента" maxWidth="Infinity"/>
+                                        <Label text="Регистрация клиента — во вкладке «Клиенты»" styleClass="help-text"/>
                                         <VBox spacing="4">
                                             <Label text="ФИО" styleClass="input-label"/>
                                             <TextField fx:id="customerNameField" promptText="Введите ФИО"/>
