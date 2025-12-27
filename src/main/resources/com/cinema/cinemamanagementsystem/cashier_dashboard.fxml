@@ -103,20 +103,9 @@
                                             <RadioButton fx:id="guestCustomerRadio" text="Гость" selected="true"/>
                                             <RadioButton fx:id="registeredCustomerRadio" text="Зарегистрированный клиент"/>
                                         </VBox>
+                                        <TextField fx:id="registeredSearchField" promptText="Поиск клиента"/>
                                         <ComboBox fx:id="registeredCustomerCombo" promptText="Выберите клиента" maxWidth="Infinity"/>
                                         <Label text="Регистрация клиента — во вкладке «Клиенты»" styleClass="help-text"/>
-                                        <VBox spacing="4">
-                                            <Label text="ФИО" styleClass="input-label"/>
-                                            <TextField fx:id="customerNameField" promptText="Введите ФИО"/>
-                                        </VBox>
-                                        <VBox spacing="4">
-                                            <Label text="Телефон" styleClass="input-label"/>
-                                            <TextField fx:id="customerPhoneField" promptText="+7XXXXXXXXXX"/>
-                                        </VBox>
-                                        <VBox spacing="4">
-                                            <Label text="Email (необязательно)" styleClass="input-label"/>
-                                            <TextField fx:id="customerEmailField" promptText="email@example.com"/>
-                                        </VBox>
                                     </VBox>
 
                                     <VBox spacing="8" styleClass="sidebar-card">
@@ -185,6 +174,26 @@
                                        prefWidth="320"/>
                             <Button fx:id="searchCustomerButton" text="Найти" styleClass="button-primary"/>
                         </HBox>
+
+                        <VBox spacing="8" styleClass="card">
+                            <Label text="Регистрация клиента" styleClass="section-title"/>
+                            <GridPane hgap="10" vgap="8">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="20"/>
+                                    <ColumnConstraints percentWidth="80"/>
+                                </columnConstraints>
+                                <Label text="ФИО:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <TextField fx:id="registrationNameField" promptText="Введите ФИО"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                <Label text="Телефон:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <TextField fx:id="registrationPhoneField" promptText="+7XXXXXXXXXX"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <TextField fx:id="registrationEmailField" promptText="email@example.com"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </GridPane>
+                            <Button fx:id="registerCustomerButton" text="Зарегистрировать" styleClass="button-success"/>
+                        </VBox>
 
                         <TableView fx:id="customersTable" styleClass="card" prefHeight="500">
                             <columns>

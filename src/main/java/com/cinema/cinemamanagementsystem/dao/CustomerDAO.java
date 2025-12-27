@@ -120,6 +120,63 @@ public class CustomerDAO {
         return customers;
     }
 
+    public Customer registerCustomer(String name, String phone, String email) {
+        Customer existing = findCustomerByPhone(phone);
+        if (existing != null) {
+            if (!existing.isRegistered()) {
+                String updateQuery = "UPDATE customer SET name = ?, email = ?, registered = 1 WHERE customer_id = ?";
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement pstmt = conn.prepareStatement(updateQuery)) {
+
+                    pstmt.setString(1, name);
+                    pstmt.setString(2, email);
+                    pstmt.setInt(3, existing.getCustomerId());
+
+                    if (pstmt.executeUpdate() > 0) {
+                        existing.setName(name);
+                        existing.setEmail(email);
+                        existing.setRegistered(true);
+                    }
+                } catch (SQLException e) {
+                    logger.error("Ошибка при обновлении регистрации клиента: {}", e.getMessage());
+                    return null;
+                }
+            }
+            return existing;
+        }
+
+        String query = "INSERT INTO customer (name, phone, email, registered, created_at) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, phone);
+            pstmt.setString(3, email);
+            pstmt.setBoolean(4, true);
+            pstmt.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now()));
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) {
+                    Customer newCustomer = new Customer();
+                    newCustomer.setCustomerId(rs.getInt(1));
+                    newCustomer.setName(name);
+                    newCustomer.setPhone(phone);
+                    newCustomer.setEmail(email);
+                    newCustomer.setRegistered(true);
+                    newCustomer.setCreatedAt(java.time.LocalDateTime.now());
+                    return newCustomer;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при регистрации клиента: {}", e.getMessage());
+        }
+        return null;
+    }
+
     // Найти клиента по телефону
     public Customer findCustomerByPhone(String phone) {
         String query = "SELECT * FROM customer WHERE phone = ?";

@@ -57,11 +57,9 @@ public class CashierController implements Initializable {
     @FXML private Label selectedHallLabel;
     @FXML private Label selectedPriceLabel;
     @FXML private GridPane seatGrid;
-    @FXML private TextField customerNameField;
-    @FXML private TextField customerPhoneField;
-    @FXML private TextField customerEmailField;
     @FXML private RadioButton guestCustomerRadio;
     @FXML private RadioButton registeredCustomerRadio;
+    @FXML private TextField registeredSearchField;
     @FXML private ComboBox<Customer> registeredCustomerCombo;
     @FXML private RadioButton immediateSaleRadio;
     @FXML private RadioButton bookingRadio;
@@ -90,6 +88,10 @@ public class CashierController implements Initializable {
     @FXML private TableColumn<Customer, Double> customerTotalColumn;
     @FXML private TextField customerSearchField;
     @FXML private Button searchCustomerButton;
+    @FXML private TextField registrationNameField;
+    @FXML private TextField registrationPhoneField;
+    @FXML private TextField registrationEmailField;
+    @FXML private Button registerCustomerButton;
 
     // Вкладка ВОЗВРАТЫ
     @FXML private TextField refundTicketIdField;
@@ -185,11 +187,7 @@ public class CashierController implements Initializable {
         sellTicketButton.setOnAction(e -> sellTickets());
         bookTicketButton.setOnAction(e -> bookTickets());
 
-        // Валидация телефона
-        customerPhoneField.textProperty().addListener((obs, oldV, newV) -> {
-            if (!newV.matches("\\+?\\d*")) customerPhoneField.setText(oldV);
-        });
-
+        registeredSearchField.textProperty().addListener((obs, oldV, newV) -> filterRegisteredCustomers(newV));
         registeredCustomerCombo.valueProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
 
         // Обновление суммы
@@ -258,6 +256,7 @@ public class CashierController implements Initializable {
         customersTable.setItems(customersList);
         searchCustomerButton.setOnAction(e -> searchCustomers());
         customerSearchField.setOnAction(e -> searchCustomers());
+        registerCustomerButton.setOnAction(e -> registerCustomer());
     }
 
     private void setupRefundsTab() {
@@ -438,6 +437,9 @@ public class CashierController implements Initializable {
     private void loadRegisteredCustomers() {
         registeredCustomersList.setAll(customerDAO.getRegisteredCustomers());
         registeredCustomerCombo.setItems(registeredCustomersList);
+        if (!registeredCustomersList.isEmpty() && registeredCustomerCombo.getValue() == null) {
+            registeredCustomerCombo.getSelectionModel().selectFirst();
+        }
     }
 
     private void loadPaymentMethods() {
@@ -829,9 +831,6 @@ public class CashierController implements Initializable {
     }
 
     private void clearSaleForm() {
-        customerNameField.clear();
-        customerPhoneField.clear();
-        customerEmailField.clear();
         registeredCustomerCombo.setValue(null);
         selectedSeatIds.clear();
         updateTotalSelected();
@@ -843,32 +842,75 @@ public class CashierController implements Initializable {
 
     private void updateCustomerMode() {
         boolean isGuest = guestCustomerRadio.isSelected();
-        customerNameField.setDisable(!isGuest);
-        customerPhoneField.setDisable(!isGuest);
-        customerEmailField.setDisable(!isGuest);
+        registeredSearchField.setDisable(isGuest);
         registeredCustomerCombo.setDisable(isGuest);
     }
 
     private boolean hasValidCustomerSelection() {
-        if (guestCustomerRadio.isSelected()) {
-            return !customerNameField.getText().trim().isEmpty()
-                    && !customerPhoneField.getText().trim().isEmpty();
-        }
-
-        return registeredCustomerCombo.getValue() != null;
+        return guestCustomerRadio.isSelected() || registeredCustomerCombo.getValue() != null;
     }
 
     private CustomerSelection resolveCustomerSelection() {
         if (guestCustomerRadio.isSelected()) {
-            Customer guest = new Customer();
-            guest.setName(customerNameField.getText().trim());
-            guest.setPhone(customerPhoneField.getText().trim());
-            guest.setEmail(customerEmailField.getText().trim());
-            guest.setRegistered(false);
+            String guestName = "Гость";
+            String guestPhone = "GUEST-" + System.currentTimeMillis();
+            Customer guest = customerDAO.createGuestCustomer(guestName, guestPhone, null);
+            if (guest == null) {
+                throw new IllegalStateException("Не удалось создать гостя");
+            }
             return new CustomerSelection(guest, true);
         }
 
         return new CustomerSelection(registeredCustomerCombo.getValue(), false);
+    }
+
+    private void filterRegisteredCustomers(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            registeredCustomerCombo.setItems(registeredCustomersList);
+            return;
+        }
+
+        String searchText = query.trim().toLowerCase(Locale.ROOT);
+        ObservableList<Customer> filtered = FXCollections.observableArrayList(
+                registeredCustomersList.stream()
+                        .filter(customer -> matchesCustomer(customer, searchText))
+                        .collect(Collectors.toList())
+        );
+        registeredCustomerCombo.setItems(filtered);
+        if (!filtered.isEmpty()) {
+            registeredCustomerCombo.getSelectionModel().selectFirst();
+        }
+    }
+
+    private boolean matchesCustomer(Customer customer, String searchText) {
+        String name = customer.getName() != null ? customer.getName().toLowerCase(Locale.ROOT) : "";
+        String phone = customer.getPhone() != null ? customer.getPhone().toLowerCase(Locale.ROOT) : "";
+        String email = customer.getEmail() != null ? customer.getEmail().toLowerCase(Locale.ROOT) : "";
+        return name.contains(searchText) || phone.contains(searchText) || email.contains(searchText);
+    }
+
+    private void registerCustomer() {
+        String name = registrationNameField.getText().trim();
+        String phone = registrationPhoneField.getText().trim();
+        String email = registrationEmailField.getText().trim();
+
+        if (name.isEmpty() || phone.isEmpty()) {
+            showAlert("Ошибка", "Заполните имя и телефон клиента", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Customer customer = customerDAO.registerCustomer(name, phone, email.isEmpty() ? null : email);
+        if (customer == null) {
+            showAlert("Ошибка", "Не удалось зарегистрировать клиента", Alert.AlertType.ERROR);
+            return;
+        }
+
+        showAlert("Успех", "Клиент зарегистрирован", Alert.AlertType.INFORMATION);
+        registrationNameField.clear();
+        registrationPhoneField.clear();
+        registrationEmailField.clear();
+        loadCustomers();
+        loadRegisteredCustomers();
     }
 
     private double calculateTicketPrice() {
