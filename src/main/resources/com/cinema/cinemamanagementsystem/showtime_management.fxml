@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cinema.cinemamanagementsystem.controllers.ShowtimeManagementController"
+      spacing="10" padding="20"
+      prefHeight="700.0" prefWidth="1000.0">
+
+    <!-- Заголовок -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Управление сеансами"
+               style="-fx-font-size: 20px; -fx-font-weight: bold;">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+        <Label fx:id="selectedFilmLabel"
+               text="Фильм: не выбран"
+               style="-fx-text-fill: #7f8c8d;"/>
+    </HBox>
+
+    <!-- Основной контейнер -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+
+        <!-- Левая панель: форма добавления сеанса -->
+        <VBox spacing="15" prefWidth="400"
+              style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
+
+            <Label text="Добавление сеанса"
+                   style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+
+            <VBox spacing="8">
+                <Label text="Фильм:"/>
+                <ComboBox fx:id="filmComboBox"
+                          promptText="Выберите фильм"
+                          prefWidth="350"/>
+            </VBox>
+
+            <HBox spacing="10">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Дата:"/>
+                    <DatePicker fx:id="showtimeDatePicker"
+                                prefWidth="170"/>
+                </VBox>
+
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Время:"/>
+                    <ComboBox fx:id="timeComboBox"
+                              promptText="ЧЧ:ММ"
+                              prefWidth="170"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="8">
+                <Label text="Зал:"/>
+                <ComboBox fx:id="hallComboBox"
+                          promptText="Выберите зал"
+                          prefWidth="350"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Базовая цена:"/>
+                <TextField fx:id="basePriceField"
+                           promptText="0.00"
+                           prefWidth="350"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Тип сеанса:"/>
+                <ComboBox fx:id="showtimeTypeCombo"
+                          prefWidth="350">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Стандартный"/>
+                            <String fx:value="Премьера"/>
+                            <String fx:value="Ночной"/>
+                            <String fx:value="Утренний"/>
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Дополнительно:"/>
+                <CheckBox fx:id="is3dCheckbox" text="3D сеанс"/>
+                <CheckBox fx:id="hasSubtitlesCheckbox" text="С субтитрами"/>
+                <CheckBox fx:id="isDubbedCheckbox" text="Дублированный"/>
+            </VBox>
+
+            <Button text="Добавить сеанс"
+                    style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"
+                    prefWidth="350"
+                    onAction="#addShowtime"/>
+
+            <Separator/>
+
+            <VBox spacing="8">
+                <Label text="Проверка расписания"
+                       style="-fx-font-weight: bold;"/>
+                <Button text="Проверить пересечения"
+                        style="-fx-background-color: #f39c12; -fx-text-fill: white;"
+                        onAction="#checkScheduleConflicts"/>
+                <Label fx:id="conflictLabel"
+                       text=""
+                       style="-fx-text-fill: #e74c3c;"/>
+            </VBox>
+
+        </VBox>
+
+        <!-- Правая панель: расписание -->
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+
+            <!-- Фильтры расписания -->
+            <HBox spacing="10">
+                <DatePicker fx:id="scheduleDateFilter"
+                            promptText="Дата"/>
+                <ComboBox fx:id="hallFilter"
+                          promptText="Все залы"/>
+                <Button text="Показать"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                <Button text="Сегодня"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="Экспорт расписания"
+                        style="-fx-background-color: #9b59b6; -fx-text-fill: white;"/>
+            </HBox>
+
+            <!-- Таблица расписания -->
+            <TableView fx:id="showtimesTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn text="Время" prefWidth="120"/>
+                    <TableColumn text="Фильм" prefWidth="200"/>
+                    <TableColumn text="Зал" prefWidth="100"/>
+                    <TableColumn text="Тип" prefWidth="100"/>
+                    <TableColumn text="Цена" prefWidth="80"/>
+                    <TableColumn text="Забронировано" prefWidth="100"/>
+                    <TableColumn text="Доступно" prefWidth="80"/>
+                    <TableColumn text="Статус" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <!-- Панель действий с сеансами -->
+            <HBox spacing="10">
+                <Button text="Просмотреть детали"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                <Button text="Изменить время"
+                        style="-fx-background-color: #f39c12; -fx-text-fill: white;"/>
+                <Button text="Изменить цену"
+                        style="-fx-background-color: #1abc9c; -fx-text-fill: white;"/>
+                <Button text="Отменить сеанс"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="Обновить"
+                        style="-fx-background-color: #7f8c8d; -fx-text-fill: white;"
+                        onAction="#refreshSchedule"/>
+            </HBox>
+
+            <!-- Визуализация расписания -->
+            <VBox spacing="5"
+                  style="-fx-background-color: #34495e; -fx-padding: 10; -fx-border-radius: 5;">
+                <Label text="Расписание на день"
+                       style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <HBox spacing="2" alignment="CENTER">
+                    <VBox spacing="2">
+                        <Label text="Время"
+                               style="-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 5;"/>
+                        <!-- Список времен -->
+                        <VBox fx:id="timeSlotsContainer"/>
+                    </VBox>
+                    <!-- Залы -->
+                    <HBox fx:id="hallsScheduleContainer" spacing="2"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+
+    </HBox>
+
+    <!-- Статусная строка -->
+    <HBox spacing="10" alignment="CENTER"
+          style="-fx-background-color: #ecf0f1; -fx-padding: 10;">
+        <Label fx:id="scheduleStatusLabel" text="Всего сеансов: 0"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label text="Последнее обновление: "/>
+        <Label fx:id="lastUpdateLabel" text="--:--:--"/>
+    </HBox>
+
+</VBox>

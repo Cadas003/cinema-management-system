@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cinema.cinemamanagementsystem.controllers.ReportController"
+      spacing="10" padding="20"
+      prefHeight="800.0" prefWidth="1200.0">
+
+    <!-- Панель управления отчетами -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Генерация отчетов"
+               style="-fx-font-size: 24px; -fx-font-weight: bold;">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+
+        <Pane HBox.hgrow="ALWAYS"/>
+
+        <Button text="Справка"
+                style="-fx-background-color: #3498db; -fx-text-fill: white;"
+                onAction="#showReportHelp"/>
+    </HBox>
+
+    <!-- Панель фильтров -->
+    <HBox spacing="15" alignment="CENTER_LEFT"
+          style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
+
+        <VBox spacing="5">
+            <Label text="Период отчета:"
+                   style="-fx-font-weight: bold;"/>
+            <HBox spacing="10">
+                <DatePicker fx:id="startDatePicker"
+                            promptText="Начальная дата"
+                            prefWidth="150"/>
+                <Label text="по"/>
+                <DatePicker fx:id="endDatePicker"
+                            promptText="Конечная дата"
+                            prefWidth="150"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Тип отчета:"
+                   style="-fx-font-weight: bold;"/>
+            <ComboBox fx:id="reportTypeComboBox"
+                      prefWidth="200"/>
+        </VBox>
+
+        <Pane HBox.hgrow="ALWAYS"/>
+
+        <VBox spacing="5">
+            <Label text="Действия:"
+                   style="-fx-font-weight: bold;"/>
+            <HBox spacing="10">
+                <Button fx:id="generateButton"
+                        text="Сгенерировать"
+                        style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+                <Button fx:id="exportButton"
+                        text="Экспорт"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                <Button fx:id="printButton"
+                        text="Печать"
+                        style="-fx-background-color: #f39c12; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+
+    </HBox>
+
+    <!-- Основное содержимое -->
+    <TabPane fx:id="reportTabs" VBox.vgrow="ALWAYS"
+             tabClosingPolicy="UNAVAILABLE">
+
+        <!-- Вкладка продаж -->
+        <Tab text="Продажи">
+            <VBox spacing="15" padding="10">
+                <!-- Статистика -->
+                <HBox spacing="20" alignment="TOP_CENTER">
+                    <VBox spacing="5" alignment="CENTER"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5; -fx-pref-width: 200;">
+                        <Label text="Общая выручка"
+                               style="-fx-font-weight: bold;"/>
+                        <Label fx:id="totalRevenueLabel" text="0.00 руб."
+                               style="-fx-font-size: 20px; -fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox spacing="5" alignment="CENTER"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5; -fx-pref-width: 200;">
+                        <Label text="Продано билетов"
+                               style="-fx-font-weight: bold;"/>
+                        <Label fx:id="totalTicketsLabel" text="0"
+                               style="-fx-font-size: 20px; -fx-text-fill: #3498db; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox spacing="5" alignment="CENTER"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5; -fx-pref-width: 200;">
+                        <Label text="Средний чек"
+                               style="-fx-font-weight: bold;"/>
+                        <Label fx:id="averageTicketLabel" text="0.00 руб."
+                               style="-fx-font-size: 20px; -fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Таблица продаж -->
+                <Label text="Детализация продаж"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <TableView fx:id="salesTable"
+                           VBox.vgrow="ALWAYS"
+                           style="-fx-border-color: #dee2e6; -fx-border-radius: 5;">
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- Вкладка фильмов -->
+        <Tab text="Фильмы">
+            <SplitPane dividerPositions="0.6" orientation="HORIZONTAL">
+                <VBox spacing="15" padding="10">
+                    <Label text="Популярность фильмов"
+                           style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    <TableView fx:id="filmsTable"
+                               VBox.vgrow="ALWAYS"
+                               style="-fx-border-color: #dee2e6; -fx-border-radius: 5;">
+                    </TableView>
+
+                    <Label fx:id="mostPopularFilmLabel"
+                           text="Самый популярный фильм: "
+                           style="-fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                </VBox>
+
+                <VBox spacing="15" padding="10" alignment="CENTER">
+                    <PieChart fx:id="filmsPieChart"
+                              prefWidth="400" prefHeight="400"/>
+                    <Label text="Распределение продаж по фильмам"
+                           style="-fx-font-weight: bold;"/>
+                </VBox>
+            </SplitPane>
+        </Tab>
+
+        <!-- Вкладка залов -->
+        <Tab text="Залы">
+            <VBox spacing="15" padding="10">
+                <Label text="Загрузка залов"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <TableView fx:id="hallsTable"
+                           VBox.vgrow="ALWAYS"
+                           style="-fx-border-color: #dee2e6; -fx-border-radius: 5;">
+                </TableView>
+
+                <HBox spacing="20">
+                    <Label fx:id="bestHallLabel"
+                           text="Самый загруженный зал: "
+                           style="-fx-font-weight: bold;"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="Рекомендации по расписанию"
+                            style="-fx-background-color: #9b59b6; -fx-text-fill: white;"/>
+                </HBox>
+            </VBox>
+        </Tab>
+
+        <!-- Вкладка клиентов -->
+        <Tab text="Клиенты">
+            <VBox spacing="15" padding="10">
+                <Label text="Активность клиентов"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <TableView fx:id="customersTable"
+                           VBox.vgrow="ALWAYS"
+                           style="-fx-border-color: #dee2e6; -fx-border-radius: 5;">
+                </TableView>
+
+                <HBox spacing="20">
+                    <VBox spacing="5">
+                        <Label text="Всего клиентов: 0"
+                               style="-fx-font-weight: bold;"/>
+                        <Label text="Среднее посещений: 0"
+                               style="-fx-font-weight: bold;"/>
+                    </VBox>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="Экспорт клиентской базы"
+                            style="-fx-background-color: #1abc9c; -fx-text-fill: white;"/>
+                </HBox>
+            </VBox>
+        </Tab>
+
+        <!-- Вкладка графиков -->
+        <Tab text="Графики">
+            <VBox spacing="20" padding="10">
+                <Label text="Динамика продаж"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <BarChart fx:id="salesChart"
+                          VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 5;"/>
+
+                <Label text="Выручка по дням"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <LineChart fx:id="revenueChart"
+                           prefHeight="300"
+                           style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 5;"/>
+            </VBox>
+        </Tab>
+
+    </TabPane>
+
+    <!-- Статусная строка -->
+    <HBox spacing="10" alignment="CENTER"
+          style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
+        <Label text="Статус:"/>
+        <Label fx:id="reportStatusLabel" text="Готов к генерации отчета"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label text="Сгенерировано:"/>
+        <Label fx:id="generationTimeLabel" text="--:--:--"/>
+    </HBox>
+
+</VBox>
