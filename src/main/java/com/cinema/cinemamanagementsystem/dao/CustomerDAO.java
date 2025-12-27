@@ -69,6 +69,25 @@ public class CustomerDAO {
         return null;
     }
 
+    // Найти клиента по ID
+    public Customer getCustomerById(int customerId) {
+        String query = "SELECT * FROM customer WHERE customer_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, customerId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToCustomer(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при поиске клиента по ID: {}", e.getMessage());
+        }
+        return null;
+    }
+
     // Получить всех клиентов (для таблицы)
     public List<Customer> getAllCustomers() {
         List<Customer> customers = new ArrayList<>();

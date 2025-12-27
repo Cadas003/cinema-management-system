@@ -60,6 +60,12 @@ public class CashierController implements Initializable {
     @FXML private TextField customerNameField;
     @FXML private TextField customerPhoneField;
     @FXML private TextField customerEmailField;
+    @FXML private RadioButton guestCustomerRadio;
+    @FXML private RadioButton existingCustomerRadio;
+    @FXML private RadioButton registerCustomerRadio;
+    @FXML private ComboBox<Customer> existingCustomerCombo;
+    @FXML private VBox existingCustomerBox;
+    @FXML private VBox registerCustomerBox;
     @FXML private RadioButton immediateSaleRadio;
     @FXML private RadioButton bookingRadio;
     @FXML private ComboBox<String> paymentMethodCombo;
@@ -163,6 +169,19 @@ public class CashierController implements Initializable {
         immediateSaleRadio.setSelected(true);
         saleTypeGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
 
+        ToggleGroup customerTypeGroup = new ToggleGroup();
+        guestCustomerRadio.setToggleGroup(customerTypeGroup);
+        existingCustomerRadio.setToggleGroup(customerTypeGroup);
+        registerCustomerRadio.setToggleGroup(customerTypeGroup);
+        guestCustomerRadio.setSelected(true);
+        customerTypeGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> {
+            updateCustomerInputsVisibility();
+            updateTotalSelected();
+        });
+
+        existingCustomerCombo.setItems(customersList);
+        existingCustomerCombo.valueProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
+
         // Настройка DatePicker
         setupDatePicker();
 
@@ -180,6 +199,7 @@ public class CashierController implements Initializable {
         customerEmailField.textProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
 
         // Обновление суммы
+        updateCustomerInputsVisibility();
         updateTotalSelected();
     }
 
@@ -419,6 +439,9 @@ public class CashierController implements Initializable {
 
     private void loadCustomers() {
         customersList.setAll(customerDAO.getAllCustomers());
+        if (existingCustomerCombo != null) {
+            existingCustomerCombo.setItems(customersList);
+        }
     }
 
     private void loadPaymentMethods() {
@@ -652,11 +675,11 @@ public class CashierController implements Initializable {
         int count = selectedSeatIds.size();
         double pricePerTicket = 0;
         if (selectedShowtime != null) {
-            boolean hasCustomer = hasCustomerData();
+            boolean isRegisteredCustomer = isRegisteredCustomerSelected();
             pricePerTicket = bookingService.calculateFinalPrice(
                     selectedShowtime.getShowtimeId(),
                     isBookingSelected(),
-                    hasCustomer
+                    isRegisteredCustomer
             );
         }
         double total = count * pricePerTicket;
@@ -680,10 +703,15 @@ public class CashierController implements Initializable {
             List<Ticket> soldTickets = new ArrayList<>();
 
             for (Integer seatId : selectedSeatIds) {
+                Customer selectedCustomer = existingCustomerRadio.isSelected()
+                        ? existingCustomerCombo.getValue()
+                        : null;
                 Ticket ticket = bookingService.sellTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
+                        selectedCustomer != null ? selectedCustomer.getCustomerId() : null,
+                        registerCustomerRadio.isSelected(),
                         customerNameField.getText().trim(),
                         customerPhoneField.getText().trim(),
                         customerEmailField.getText().trim()
@@ -720,10 +748,15 @@ public class CashierController implements Initializable {
             List<Ticket> bookedTickets = new ArrayList<>();
 
             for (Integer seatId : selectedSeatIds) {
+                Customer selectedCustomer = existingCustomerRadio.isSelected()
+                        ? existingCustomerCombo.getValue()
+                        : null;
                 Ticket ticket = bookingService.bookTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
+                        selectedCustomer != null ? selectedCustomer.getCustomerId() : null,
+                        registerCustomerRadio.isSelected(),
                         customerNameField.getText().trim(),
                         customerPhoneField.getText().trim(),
                         customerEmailField.getText().trim()
@@ -766,7 +799,7 @@ public class CashierController implements Initializable {
         if (selectedShowtime == null) throw new IllegalArgumentException("Выберите сеанс");
         if (selectedSeatIds.isEmpty()) throw new IllegalArgumentException("Выберите места");
         if (!isCustomerInputValid()) {
-            throw new IllegalArgumentException("Для регистрации нужны имя и телефон (или оставьте поля пустыми)");
+            throw new IllegalArgumentException("Выберите клиента или заполните данные для регистрации");
         }
 
         // Проверяем, что выбранные места еще свободны
@@ -796,24 +829,55 @@ public class CashierController implements Initializable {
                 bookingService.calculateFinalPrice(
                         selectedShowtime.getShowtimeId(),
                         isBookingSelected(),
-                        hasCustomerData()
+                        isRegisteredCustomerSelected()
                 ),
                 freeSeats, totalSeats));
     }
 
-    private boolean hasCustomerData() {
-        return !customerNameField.getText().trim().isEmpty()
-                && !customerPhoneField.getText().trim().isEmpty();
-    }
-
     private boolean isCustomerInputValid() {
+        if (guestCustomerRadio.isSelected()) {
+            return true;
+        }
+        if (existingCustomerRadio.isSelected()) {
+            return existingCustomerCombo.getValue() != null;
+        }
         boolean hasName = !customerNameField.getText().trim().isEmpty();
         boolean hasPhone = !customerPhoneField.getText().trim().isEmpty();
-        return (hasName && hasPhone) || (!hasName && !hasPhone);
+        return hasName && hasPhone;
     }
 
     private boolean isBookingSelected() {
         return bookingRadio.isSelected();
+    }
+
+    private boolean isRegisteredCustomerSelected() {
+        if (existingCustomerRadio.isSelected()) {
+            return existingCustomerCombo.getValue() != null;
+        }
+        if (registerCustomerRadio.isSelected()) {
+            return !customerNameField.getText().trim().isEmpty()
+                    && !customerPhoneField.getText().trim().isEmpty();
+        }
+        return false;
+    }
+
+    private void updateCustomerInputsVisibility() {
+        boolean showExisting = existingCustomerRadio.isSelected();
+        boolean showRegister = registerCustomerRadio.isSelected();
+
+        existingCustomerBox.setVisible(showExisting);
+        existingCustomerBox.setManaged(showExisting);
+        registerCustomerBox.setVisible(showRegister);
+        registerCustomerBox.setManaged(showRegister);
+
+        if (!showExisting) {
+            existingCustomerCombo.getSelectionModel().clearSelection();
+        }
+        if (!showRegister) {
+            customerNameField.clear();
+            customerPhoneField.clear();
+            customerEmailField.clear();
+        }
     }
 
     private void clearFilmSelection() {
@@ -847,6 +911,11 @@ public class CashierController implements Initializable {
         customerNameField.clear();
         customerPhoneField.clear();
         customerEmailField.clear();
+        if (existingCustomerCombo != null) {
+            existingCustomerCombo.getSelectionModel().clearSelection();
+        }
+        guestCustomerRadio.setSelected(true);
+        updateCustomerInputsVisibility();
         selectedSeatIds.clear();
         updateTotalSelected();
 

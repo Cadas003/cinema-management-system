@@ -96,29 +96,45 @@
 
                             <!-- ПРАВАЯ КОЛОНКА: Данные клиента -->
                             <VBox spacing="15" prefWidth="350">
-                                <Label text="Данные клиента (для регистрации):"
+                                <Label text="Данные клиента:"
                                        style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
 
                                 <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
-                                    <VBox spacing="8">
-                                        <Label text="ФИО клиента:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerNameField"
-                                                   promptText="Введите ФИО"
-                                                   prefWidth="320"/>
+                                    <Label text="Тип клиента:" style="-fx-font-weight: bold;"/>
+                                    <VBox spacing="6">
+                                        <RadioButton fx:id="guestCustomerRadio" text="Гость"/>
+                                        <RadioButton fx:id="existingCustomerRadio" text="Выбрать существующего"/>
+                                        <RadioButton fx:id="registerCustomerRadio" text="Регистрация нового клиента"/>
                                     </VBox>
 
-                                    <VBox spacing="8">
-                                        <Label text="Телефон:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerPhoneField"
-                                                   promptText="+7XXXXXXXXXX"
-                                                   prefWidth="320"/>
+                                    <VBox fx:id="existingCustomerBox" spacing="8">
+                                        <Label text="Существующий клиент:" style="-fx-font-weight: bold;"/>
+                                        <ComboBox fx:id="existingCustomerCombo"
+                                                  promptText="Выберите клиента"
+                                                  prefWidth="320"/>
                                     </VBox>
 
-                                    <VBox spacing="8">
-                                        <Label text="Email (необязательно):" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerEmailField"
-                                                   promptText="email@example.com"
-                                                   prefWidth="320"/>
+                                    <VBox fx:id="registerCustomerBox" spacing="10">
+                                        <VBox spacing="8">
+                                            <Label text="ФИО клиента:" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="customerNameField"
+                                                       promptText="Введите ФИО"
+                                                       prefWidth="320"/>
+                                        </VBox>
+
+                                        <VBox spacing="8">
+                                            <Label text="Телефон:" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="customerPhoneField"
+                                                       promptText="+7XXXXXXXXXX"
+                                                       prefWidth="320"/>
+                                        </VBox>
+
+                                        <VBox spacing="8">
+                                            <Label text="Email (необязательно):" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="customerEmailField"
+                                                       promptText="email@example.com"
+                                                       prefWidth="320"/>
+                                        </VBox>
                                     </VBox>
                                 </VBox>
 
