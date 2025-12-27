@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cinema.cinemamanagementsystem.controllers.AdminController"
+            prefHeight="800.0" prefWidth="1200.0"
+            styleClass="app-root">
+
+    <top>
+        <VBox spacing="10" styleClass="app-header">
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Кинотеатр 'КиноСфера'"
+                           styleClass="header-title">
+                        <font>
+                            <Font name="System Bold" size="20.0" />
+                        </font>
+                    </Label>
+                    <Label text="Панель администратора" styleClass="header-subtitle"/>
+                </VBox>
+
+                <Pane HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="16" alignment="CENTER_RIGHT">
+                    <VBox spacing="2" alignment="CENTER_RIGHT">
+                        <Label fx:id="welcomeLabel" text="Добро пожаловать" styleClass="header-meta"/>
+                        <Label fx:id="currentTimeLabel" styleClass="header-time"/>
+                    </VBox>
+                    <Button text="Выйти" onAction="#handleLogout" styleClass="button-danger"/>
+                    <Button text="Закрыть" onAction="#handleExit" styleClass="button-warning"/>
+                </HBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tabs">
+            <tabs>
+                <Tab text="Фильмы">
+                    <VBox spacing="16" styleClass="content-wrapper">
+                        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                            <TextField fx:id="filmSearchField" promptText="Поиск по названию или жанру" prefWidth="300"/>
+                            <Button fx:id="addFilmButton" text="Добавить" styleClass="button-success"/>
+                            <Button fx:id="editFilmButton" text="Изменить" styleClass="button-warning"/>
+                            <Button fx:id="deleteFilmButton" text="Удалить" styleClass="button-danger"/>
+                        </HBox>
+
+                        <TableView fx:id="filmsTable" styleClass="card">
+                            <columns>
+                                <TableColumn fx:id="filmIdColumn" text="ID" prefWidth="60"/>
+                                <TableColumn fx:id="filmTitleColumn" text="Название" prefWidth="260"/>
+                                <TableColumn fx:id="filmGenreColumn" text="Жанр" prefWidth="180"/>
+                                <TableColumn fx:id="filmDurationColumn" text="Длительность, мин" prefWidth="160"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Сеансы">
+                    <VBox spacing="16" styleClass="content-wrapper">
+                        <HBox spacing="16">
+                            <VBox spacing="12" styleClass="card" prefWidth="420">
+                                <Label text="Новый сеанс" styleClass="section-title"/>
+                                <DatePicker fx:id="showtimeDatePicker" promptText="Дата"/>
+                                <ComboBox fx:id="filmComboBox" promptText="Фильм"/>
+                                <ComboBox fx:id="hallComboBox" promptText="Зал"/>
+                                <ComboBox fx:id="timeComboBox" promptText="Время"/>
+                                <TextField fx:id="basePriceField" promptText="Базовая цена"/>
+                                <Button fx:id="addShowtimeButton" text="Добавить сеанс" styleClass="button-primary"/>
+                            </VBox>
+
+                            <TableView fx:id="showtimesTable" styleClass="card" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="showtimeIdColumn" text="ID" prefWidth="60"/>
+                                    <TableColumn fx:id="showtimeFilmColumn" text="Фильм" prefWidth="240"/>
+                                    <TableColumn fx:id="showtimeHallColumn" text="Зал" prefWidth="150"/>
+                                    <TableColumn fx:id="showtimeDateTimeColumn" text="Дата и время" prefWidth="200"/>
+                                    <TableColumn fx:id="showtimePriceColumn" text="Цена" prefWidth="120"/>
+                                </columns>
+                            </TableView>
+                        </HBox>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Отчеты">
+                    <VBox spacing="16" styleClass="content-wrapper">
+                        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                            <DatePicker fx:id="reportStartDate" promptText="Начальная дата"/>
+                            <DatePicker fx:id="reportEndDate" promptText="Конечная дата"/>
+                            <ComboBox fx:id="reportTypeComboBox" promptText="Тип отчета" prefWidth="220"/>
+                            <Button fx:id="generateReportButton" text="Сформировать" styleClass="button-primary"/>
+                            <Button fx:id="exportReportButton" text="Экспорт" styleClass="button-success"/>
+                        </HBox>
+
+                        <HBox spacing="12">
+                            <Label fx:id="totalRevenueLabel" text="Общая выручка: -" styleClass="stat-chip"/>
+                            <Label fx:id="totalTicketsLabel" text="Продано билетов: -" styleClass="stat-chip"/>
+                        </HBox>
+
+                        <TableView fx:id="reportTable" styleClass="card" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER" styleClass="app-footer">
+            <Label text="Статус: "/>
+            <Label text="Готов к работе" styleClass="status-ready"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label text="© 2025 Кинотеатр 'КиноСфера'. Администрирование"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

@@ -958,14 +958,16 @@ public class CashierController implements Initializable {
     @FXML
     private void handleLogout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/cinema/fxml/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    "/com/cinema/cinemamanagementsystem/login.fxml"));
             Parent root = loader.load();
 
             LoginController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
 
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/com/cinema/styles/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(
+                    getClass().getResource("/com/cinema/cinemamanagementsystem/style.css")).toExternalForm());
 
             primaryStage.setTitle("Кинотеатр 'КиноСфера' - Авторизация");
             primaryStage.setScene(scene);

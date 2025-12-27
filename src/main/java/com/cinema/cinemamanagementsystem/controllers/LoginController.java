@@ -76,7 +76,8 @@ public class LoginController {
 
     private void loadAdminPanel(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/cinema/fxml/admin_dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    "/com/cinema/cinemamanagementsystem/admin_dashboard.fxml"));
             Parent root = loader.load();
 
             AdminController controller = loader.getController();
@@ -100,7 +101,8 @@ public class LoginController {
 
     private void loadCashierPanel(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/cinema/cinemamanagementsystem/cashier_dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    "/com/cinema/cinemamanagementsystem/cashier_dashboard.fxml"));
             Parent root = loader.load();
 
             CashierController controller = loader.getController();

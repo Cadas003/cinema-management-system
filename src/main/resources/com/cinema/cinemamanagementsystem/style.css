@@ -1,16 +1,121 @@
 /* ===========================
    ГЛОБАЛЬНЫЕ НАСТРОЙКИ
    =========================== */
-.root {
+.root, .app-root {
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
     -fx-background-color: #f4f6f9;
+}
+
+.app-header {
+    -fx-background-color: linear-gradient(to right, #1f2a44, #2c3e50);
+    -fx-padding: 18 20 14 20;
+}
+
+.header-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.header-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-size: 13px;
+}
+
+.header-meta {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.header-time {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-size: 12px;
+}
+
+.app-footer {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 10 16;
+}
+
+.status-ready {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: bold;
+}
+
+.content-wrapper {
+    -fx-padding: 20;
+}
+
+.content-scroll {
+    -fx-background-color: transparent;
+}
+
+.toolbar {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 12 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 16, 0.2, 0, 3);
+}
+
+.section-title {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.input-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.info-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.info-label-accent {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}
+
+.stat-chip {
+    -fx-background-color: #fff0f0;
+    -fx-text-fill: #c0392b;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
+    -fx-background-radius: 20;
+}
+
+.hint-card {
+    -fx-background-color: #e8f5e9;
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+}
+
+.hint-title {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: bold;
+}
+
+.help-text {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 12px;
+}
+
+.film-tiles {
+    -fx-padding: 10;
+}
+
+.app-menubar {
+    -fx-background-color: transparent;
 }
 
 /* Мягкая тень для всех крупных панелей */
 .card {
     -fx-background-color: white;
     -fx-background-radius: 12;
-    -fx-padding: 20;
+    -fx-padding: 16;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0.2, 0, 4);
 }
 
@@ -82,13 +187,13 @@
     -fx-background-color: transparent;
 }
 
-.tab {
+.main-tabs .tab {
     -fx-background-color: #e3e7ec;
     -fx-background-radius: 8 8 0 0;
     -fx-padding: 8 16;
 }
 
-.tab:selected {
+.main-tabs .tab:selected {
     -fx-background-color: white;
     -fx-border-color: #d0d7de;
     -fx-border-width: 1 1 0 1;
