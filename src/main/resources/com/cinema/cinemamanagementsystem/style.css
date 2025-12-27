@@ -46,7 +46,7 @@
 }
 
 .content-wrapper {
-    -fx-padding: 16;
+    -fx-padding: 12;
 }
 
 .content-scroll {
@@ -62,14 +62,14 @@
 .toolbar {
     -fx-background-color: white;
     -fx-background-radius: 12;
-    -fx-padding: 10 14;
+    -fx-padding: 8 12;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 12, 0.2, 0, 2);
 }
 
 .section-title {
     -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
 .input-label {
@@ -91,14 +91,14 @@
     -fx-background-color: #edf2ff;
     -fx-text-fill: #2f5cc8;
     -fx-font-weight: bold;
-    -fx-padding: 4 10;
+    -fx-padding: 3 8;
     -fx-background-radius: 20;
 }
 
 .hint-card {
     -fx-background-color: #eef6ff;
     -fx-background-radius: 10;
-    -fx-padding: 10;
+    -fx-padding: 8;
 }
 
 .hint-title {
@@ -108,11 +108,11 @@
 
 .help-text {
     -fx-text-fill: #7f8c8d;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 
 .film-tiles {
-    -fx-padding: 10;
+    -fx-padding: 6;
 }
 
 .app-menubar {
@@ -157,7 +157,7 @@
 .card {
     -fx-background-color: white;
     -fx-background-radius: 10;
-    -fx-padding: 12;
+    -fx-padding: 10;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 16, 0.2, 0, 3);
 }
 
@@ -304,8 +304,8 @@
 .button {
     -fx-background-radius: 8;
     -fx-font-weight: bold;
-    -fx-padding: 6 14;
-    -fx-font-size: 13px;
+    -fx-padding: 5 12;
+    -fx-font-size: 12px;
 }
 
 .button:focused {
@@ -355,7 +355,7 @@
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-border-color: #d0d7de;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
 .text-field:focused, .combo-box:focused, .date-picker:focused {
@@ -387,7 +387,7 @@
 .seat-grid {
     -fx-background-color: #223048;
     -fx-background-radius: 10;
-    -fx-padding: 16;
+    -fx-padding: 10;
 }
 
 .seat {
@@ -418,7 +418,7 @@
     -fx-background-color: #2d3d57;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 8;
+    -fx-padding: 6;
     -fx-background-radius: 8;
 }
 
@@ -427,9 +427,22 @@
     -fx-vgap: 12;
 }
 
+.compact-grid-tight {
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}
+
 .sidebar-card {
     -fx-background-color: white;
     -fx-background-radius: 10;
-    -fx-padding: 12;
+    -fx-padding: 10;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 12, 0.2, 0, 2);
+}
+
+.compact-card {
+    -fx-background-insets: 0;
+}
+
+.compact-toolbar {
+    -fx-background-radius: 10;
 }

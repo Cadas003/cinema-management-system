@@ -495,9 +495,9 @@ public class CashierController implements Initializable {
             ColumnConstraints colConst = new ColumnConstraints();
             colConst.setHalignment(HPos.CENTER);
             colConst.setHgrow(Priority.SOMETIMES);
-            colConst.setMinWidth(35);
-            colConst.setPrefWidth(40);
-            colConst.setMaxWidth(45);
+            colConst.setMinWidth(30);
+            colConst.setPrefWidth(34);
+            colConst.setMaxWidth(38);
             seatGrid.getColumnConstraints().add(colConst);
         }
 
@@ -506,9 +506,9 @@ public class CashierController implements Initializable {
             RowConstraints rowConst = new RowConstraints();
             rowConst.setValignment(VPos.CENTER);
             rowConst.setVgrow(Priority.SOMETIMES);
-            rowConst.setMinHeight(35);
-            rowConst.setPrefHeight(40);
-            rowConst.setMaxHeight(45);
+            rowConst.setMinHeight(30);
+            rowConst.setPrefHeight(34);
+            rowConst.setMaxHeight(38);
             seatGrid.getRowConstraints().add(rowConst);
         }
 
@@ -550,9 +550,9 @@ public class CashierController implements Initializable {
                 }
 
                 Button seatButton = new Button(String.valueOf(colNum));
-                seatButton.setPrefSize(38, 38);
-                seatButton.setMinSize(35, 35);
-                seatButton.setMaxSize(42, 42);
+                seatButton.setPrefSize(32, 32);
+                seatButton.setMinSize(30, 30);
+                seatButton.setMaxSize(36, 36);
 
                 final boolean isSelected = selectedSeatIds.contains(seat.getSeatId());  // Добавить final
 
@@ -602,12 +602,12 @@ public class CashierController implements Initializable {
             }
         }
 
-        seatGrid.setPadding(new Insets(15));
+        seatGrid.setPadding(new Insets(10));
         seatGrid.setHgap(5);
         seatGrid.setVgap(5);
 
-        int preferredWidth = (maxCol + 1) * 40 + 30;
-        int preferredHeight = (maxRow + 2) * 40 + 30;
+        int preferredWidth = (maxCol + 1) * 34 + 24;
+        int preferredHeight = (maxRow + 2) * 34 + 24;
         seatGrid.setPrefSize(preferredWidth, preferredHeight);
     }
 
