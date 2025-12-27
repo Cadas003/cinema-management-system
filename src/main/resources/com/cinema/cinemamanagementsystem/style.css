@@ -3,41 +3,41 @@
    =========================== */
 .root, .app-root {
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
-    -fx-background-color: linear-gradient(to bottom, #f7f9fc, #eef2f7);
-    -fx-text-fill: #2c3e50;
+    -fx-background-color: linear-gradient(to bottom, #f5f7fb, #e9eff8);
+    -fx-text-fill: #1f2a44;
 }
 
 .app-header {
-    -fx-background-color: linear-gradient(to right, #1c2541, #243b55);
-    -fx-padding: 18 24 16 24;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 16, 0.2, 0, 3);
+    -fx-background-color: linear-gradient(to right, #20304a, #2b4163);
+    -fx-padding: 14 18 12 18;
+    -fx-effect: dropshadow(gaussian, rgba(15,25,40,0.25), 14, 0.2, 0, 2);
 }
 
 .header-title {
     -fx-text-fill: white;
-    -fx-font-size: 21px;
+    -fx-font-size: 19px;
     -fx-font-weight: bold;
 }
 
 .header-subtitle {
     -fx-text-fill: rgba(255, 255, 255, 0.7);
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
 .header-meta {
     -fx-text-fill: white;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
 
 .header-time {
     -fx-text-fill: rgba(255, 255, 255, 0.7);
-    -fx-font-size: 12px;
+    -fx-font-size: 11px;
 }
 
 .app-footer {
     -fx-background-color: #ecf0f1;
-    -fx-padding: 10 18;
+    -fx-padding: 8 16;
 }
 
 .status-ready {
@@ -46,7 +46,7 @@
 }
 
 .content-wrapper {
-    -fx-padding: 22;
+    -fx-padding: 16;
 }
 
 .content-scroll {
@@ -62,14 +62,14 @@
 .toolbar {
     -fx-background-color: white;
     -fx-background-radius: 12;
-    -fx-padding: 12 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.2, 0, 3);
+    -fx-padding: 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 14, 0.2, 0, 2);
 }
 
 .section-title {
     -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
 }
 
 .input-label {
@@ -88,27 +88,27 @@
 }
 
 .stat-chip {
-    -fx-background-color: #edf4ff;
-    -fx-text-fill: #1f6feb;
+    -fx-background-color: #e6f0ff;
+    -fx-text-fill: #1b57c7;
     -fx-font-weight: bold;
-    -fx-padding: 6 12;
+    -fx-padding: 4 10;
     -fx-background-radius: 20;
 }
 
 .hint-card {
-    -fx-background-color: #e8f3ff;
+    -fx-background-color: #eef6ff;
     -fx-background-radius: 10;
-    -fx-padding: 12;
+    -fx-padding: 10;
 }
 
 .hint-title {
-    -fx-text-fill: #1f6feb;
+    -fx-text-fill: #1b57c7;
     -fx-font-weight: bold;
 }
 
 .help-text {
     -fx-text-fill: #7f8c8d;
-    -fx-font-size: 12px;
+    -fx-font-size: 11px;
 }
 
 .film-tiles {
@@ -131,22 +131,22 @@
 
 .card-title {
     -fx-text-fill: #1f2a44;
-    -fx-font-size: 16px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 
 .soft-card {
-    -fx-background-color: #f9fbff;
-    -fx-background-radius: 12;
-    -fx-padding: 14;
+    -fx-background-color: #f7f9fe;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
     -fx-border-color: #e1e8f2;
-    -fx-border-radius: 12;
+    -fx-border-radius: 10;
 }
 
 .seat-card {
-    -fx-background-color: #1f2a44;
-    -fx-background-radius: 14;
-    -fx-padding: 16;
+    -fx-background-color: #1f2f46;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
 }
 
 .seat-card .label {
@@ -156,9 +156,9 @@
 /* Мягкая тень для всех крупных панелей */
 .card {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-padding: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0.2, 0, 4);
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 18, 0.2, 0, 3);
 }
 
 /* ===========================
@@ -232,7 +232,7 @@
 .main-tabs .tab {
     -fx-background-color: #e3e7ec;
     -fx-background-radius: 8 8 0 0;
-    -fx-padding: 8 16;
+    -fx-padding: 6 12;
 }
 
 .main-tabs .tab:selected {
@@ -296,8 +296,8 @@
 .button {
     -fx-background-radius: 8;
     -fx-font-weight: bold;
-    -fx-padding: 8 18;
-    -fx-font-size: 14px;
+    -fx-padding: 6 14;
+    -fx-font-size: 13px;
 }
 
 .button:focused {
@@ -347,7 +347,7 @@
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-border-color: #d0d7de;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
 }
 
 .text-field:focused, .combo-box:focused, .date-picker:focused {
@@ -377,9 +377,9 @@
    СХЕМА ЗАЛА
    =========================== */
 .seat-grid {
-    -fx-background-color: #2c3e50;
-    -fx-background-radius: 12;
-    -fx-padding: 25;
+    -fx-background-color: #23344d;
+    -fx-background-radius: 10;
+    -fx-padding: 16;
 }
 
 .seat {
@@ -410,6 +410,18 @@
     -fx-background-color: #34495e;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 12;
+    -fx-padding: 8;
     -fx-background-radius: 8;
+}
+
+.compact-grid {
+    -fx-hgap: 12;
+    -fx-vgap: 12;
+}
+
+.sidebar-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 14, 0.2, 0, 2);
 }

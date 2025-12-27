@@ -51,94 +51,95 @@
             <tabs>
                 <Tab text="Продажа билетов">
                     <ScrollPane fitToWidth="true" styleClass="content-scroll">
-                        <VBox spacing="20" styleClass="content-wrapper">
-                            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
-                                <Label text="Выберите дату:" styleClass="section-title"/>
-                                <DatePicker fx:id="datePicker" prefWidth="200"/>
+                        <VBox spacing="12" styleClass="content-wrapper">
+                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar">
+                                <Label text="Дата" styleClass="section-title"/>
+                                <DatePicker fx:id="datePicker" prefWidth="180"/>
                                 <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб."
                                        styleClass="stat-chip"/>
                             </HBox>
 
-                            <HBox spacing="20">
-                                <VBox spacing="14" prefWidth="650">
-                                    <Label text="Фильмы и сеансы на выбранную дату:" styleClass="section-title"/>
+                            <GridPane styleClass="compact-grid">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="66"/>
+                                    <ColumnConstraints percentWidth="34"/>
+                                </columnConstraints>
 
-                                    <VBox spacing="10" styleClass="card">
-                                        <ScrollPane prefHeight="260" styleClass="content-scroll">
+                                <VBox spacing="10" GridPane.columnIndex="0">
+                                    <Label text="Фильмы и сеансы" styleClass="section-title"/>
+                                    <VBox spacing="8" styleClass="card">
+                                        <ScrollPane prefHeight="220" styleClass="content-scroll">
                                             <TilePane fx:id="filmsTilePane"
-                                                      hgap="15" vgap="15"
-                                                      prefTileWidth="250"
-                                                      prefTileHeight="150"
+                                                      hgap="12" vgap="12"
+                                                      prefTileWidth="230"
+                                                      prefTileHeight="135"
                                                       styleClass="film-tiles"/>
                                         </ScrollPane>
                                     </VBox>
 
-                                    <Label text="Информация о выбранном сеансе:" styleClass="section-title"/>
-                                    <VBox spacing="6" styleClass="card">
-                                        <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
-                                        <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
-                                        <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
-                                        <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
-                                    </VBox>
-
-                                    <Label text="Выбор места:" styleClass="section-title"/>
-                                    <VBox spacing="10" styleClass="seat-card">
-                                        <Label text="Экран" styleClass="screen" alignment="CENTER"/>
-                                        <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
-                                    </VBox>
+                                    <Label text="Сеанс" styleClass="section-title"/>
+                                    <GridPane hgap="12" vgap="12">
+                                        <columnConstraints>
+                                            <ColumnConstraints percentWidth="40"/>
+                                            <ColumnConstraints percentWidth="60"/>
+                                        </columnConstraints>
+                                        <VBox spacing="6" styleClass="card" GridPane.columnIndex="0">
+                                            <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
+                                            <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
+                                            <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
+                                            <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
+                                        </VBox>
+                                        <VBox spacing="8" styleClass="seat-card" GridPane.columnIndex="1">
+                                            <Label text="Экран" styleClass="screen" alignment="CENTER"/>
+                                            <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                                        </VBox>
+                                    </GridPane>
                                 </VBox>
 
-                                <VBox spacing="16" prefWidth="360">
-                                    <Label text="Данные клиента" styleClass="section-title"/>
-
-                                    <VBox spacing="12" styleClass="card">
-                                        <VBox spacing="6">
-                                            <Label text="ФИО клиента:" styleClass="input-label"/>
+                                <VBox spacing="10" GridPane.columnIndex="1">
+                                    <VBox spacing="8" styleClass="sidebar-card">
+                                        <Label text="Клиент" styleClass="section-title"/>
+                                        <VBox spacing="4">
+                                            <Label text="ФИО" styleClass="input-label"/>
                                             <TextField fx:id="customerNameField" promptText="Введите ФИО"/>
                                         </VBox>
-
-                                        <VBox spacing="6">
-                                            <Label text="Телефон:" styleClass="input-label"/>
+                                        <VBox spacing="4">
+                                            <Label text="Телефон" styleClass="input-label"/>
                                             <TextField fx:id="customerPhoneField" promptText="+7XXXXXXXXXX"/>
                                         </VBox>
-
-                                        <VBox spacing="6">
-                                            <Label text="Email (необязательно):" styleClass="input-label"/>
+                                        <VBox spacing="4">
+                                            <Label text="Email (необязательно)" styleClass="input-label"/>
                                             <TextField fx:id="customerEmailField" promptText="email@example.com"/>
                                         </VBox>
                                     </VBox>
 
-                                    <Label text="Тип операции" styleClass="section-title"/>
-                                    <HBox spacing="16" styleClass="soft-card">
+                                    <VBox spacing="8" styleClass="sidebar-card">
+                                        <Label text="Тип операции" styleClass="section-title"/>
                                         <VBox spacing="6">
                                             <RadioButton fx:id="immediateSaleRadio" text="Немедленная продажа" selected="true"/>
-                                            <Label text="Билет сразу продается" styleClass="help-text"/>
+                                            <RadioButton fx:id="bookingRadio" text="Бронирование на 15 минут"/>
                                         </VBox>
-                                        <VBox spacing="6">
-                                            <RadioButton fx:id="bookingRadio" text="Бронирование"/>
-                                            <Label text="Бронь на 15 минут" styleClass="help-text"/>
+                                    </VBox>
+
+                                    <VBox spacing="8" styleClass="sidebar-card">
+                                        <Label fx:id="paymentMethodLabel" text="Способ оплаты" styleClass="section-title"
+                                               visible="false" managed="false"/>
+                                        <ComboBox fx:id="paymentMethodCombo" prefWidth="200"
+                                                  visible="false" managed="false"/>
+                                        <HBox spacing="10">
+                                            <Button fx:id="sellTicketButton" text="ПРОДАТЬ"
+                                                    styleClass="button-success" prefWidth="140" prefHeight="36"/>
+                                            <Button fx:id="bookTicketButton" text="ЗАБРОНИРОВАТЬ"
+                                                    styleClass="button-warning" prefWidth="160" prefHeight="36"/>
+                                        </HBox>
+                                        <VBox spacing="4" styleClass="hint-card">
+                                            <Label text="Подсказка" styleClass="hint-title"/>
+                                            <Label text="1. Дата → 2. Фильм и время → 3. Места → 4. Данные клиента"
+                                                   styleClass="help-text" wrapText="true"/>
                                         </VBox>
-                                    </HBox>
-
-                                    <Label fx:id="paymentMethodLabel" text="Способ оплаты" styleClass="section-title"
-                                           visible="false" managed="false"/>
-                                    <ComboBox fx:id="paymentMethodCombo" prefWidth="200"
-                                              visible="false" managed="false"/>
-
-                                    <HBox spacing="12" alignment="CENTER">
-                                        <Button fx:id="sellTicketButton" text="ПРОДАТЬ БИЛЕТЫ"
-                                                styleClass="button-success" prefWidth="160" prefHeight="40"/>
-                                        <Button fx:id="bookTicketButton" text="ЗАБРОНИРОВАТЬ"
-                                                styleClass="button-warning" prefWidth="160" prefHeight="40"/>
-                                    </HBox>
-
-                                    <VBox spacing="6" styleClass="hint-card">
-                                        <Label text="Подсказка" styleClass="hint-title"/>
-                                        <Label text="1. Выберите дату → 2. Выберите фильм и время → 3. Выберите места → 4. Заполните данные клиента"
-                                               styleClass="help-text" wrapText="true"/>
                                     </VBox>
                                 </VBox>
-                            </HBox>
+                            </GridPane>
                         </VBox>
                     </ScrollPane>
                 </Tab>
