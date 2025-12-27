@@ -20,10 +20,12 @@ module com.cinema.cinemamanagementsystem {
     opens com.cinema.cinemamanagementsystem.controllers to javafx.fxml;
     opens com.cinema.cinemamanagementsystem.dao to javafx.fxml;
     opens com.cinema.cinemamanagementsystem.models to javafx.base;
+    opens com.cinema.cinemamanagementsystem.ui to javafx.fxml;
 
     // Экспортируем пакеты, если они используются вне модуля
     exports com.cinema.cinemamanagementsystem;
     exports com.cinema.cinemamanagementsystem.controllers;
     exports com.cinema.cinemamanagementsystem.dao;
     exports com.cinema.cinemamanagementsystem.models;
+    exports com.cinema.cinemamanagementsystem.ui;
 }

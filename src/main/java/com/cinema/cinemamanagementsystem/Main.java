@@ -29,7 +29,7 @@ public class Main extends Application {
             controller.setPrimaryStage(primaryStage);
 
             // Настраиваем главное окно
-            Scene scene = new Scene(root, 900, 600);
+            Scene scene = new Scene(root, 520, 420);
             scene.getStylesheets().add(Objects.requireNonNull(
                     getClass().getResource("/com/cinema/cinemamanagementsystem/style.css")).toExternalForm());
 
@@ -37,8 +37,8 @@ public class Main extends Application {
            // primaryStage.getIcons().add(new Image(
                   //  Objects.requireNonNull(getClass().getResourceAsStream("/com/cinema/styles/icon.png"))));
             primaryStage.setScene(scene);
-            primaryStage.setMinWidth(900);
-            primaryStage.setMinHeight(600);
+            primaryStage.setMinWidth(520);
+            primaryStage.setMinHeight(420);
             primaryStage.show();
 
             logger.info("Приложение успешно запущено");

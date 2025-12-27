@@ -9,7 +9,8 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.CashierController"
             prefHeight="800.0" prefWidth="1200.0"
-            styleClass="app-root">
+            styleClass="app-root"
+            fx:id="cashierRoot">
 
     <top>
         <VBox spacing="10" styleClass="app-header">
@@ -58,20 +59,22 @@
                             <VBox spacing="6">
                                 <Label text="Сеансы на выбранную дату" styleClass="section-title"/>
                                 <VBox spacing="6" styleClass="card compact-card">
-                                    <ScrollPane prefHeight="340" styleClass="content-scroll">
-                                        <TilePane fx:id="filmsTilePane"
-                                                  hgap="12" vgap="12"
-                                                  prefTileWidth="220"
-                                                  prefTileHeight="140"
-                                                  styleClass="film-tiles film-grid">
+                                    <StackPane fx:id="showtimesStatePane">
+                                        <ScrollPane fx:id="showtimesScrollPane" prefHeight="340" styleClass="content-scroll">
+                                            <TilePane fx:id="filmsTilePane"
+                                                      hgap="12" vgap="12"
+                                                      prefTileWidth="220"
+                                                      prefTileHeight="140"
+                                                      styleClass="film-tiles film-grid">
+                                                <padding>
+                                                    <Insets top="16" right="16" bottom="16" left="16"/>
+                                                </padding>
+                                            </TilePane>
                                             <padding>
-                                                <Insets top="16" right="16" bottom="16" left="16"/>
+                                                <Insets top="10" right="10" bottom="10" left="10"/>
                                             </padding>
-                                        </TilePane>
-                                        <padding>
-                                            <Insets top="10" right="10" bottom="10" left="10"/>
-                                        </padding>
-                                    </ScrollPane>
+                                        </ScrollPane>
+                                    </StackPane>
                                 </VBox>
                             </VBox>
                         </VBox>
@@ -85,16 +88,18 @@
                             <Label text="(автообновление каждую минуту)" styleClass="help-text"/>
                         </HBox>
 
-                        <TableView fx:id="bookingsTable" styleClass="card" prefHeight="400">
-                            <columns>
-                                <TableColumn fx:id="bookingIdColumn" text="№" prefWidth="50"/>
-                                <TableColumn fx:id="bookingFilmColumn" text="Фильм" prefWidth="200"/>
-                                <TableColumn fx:id="bookingTimeColumn" text="Время брони" prefWidth="120"/>
-                                <TableColumn fx:id="bookingSeatColumn" text="Место" prefWidth="150"/>
-                                <TableColumn fx:id="bookingCustomerColumn" text="Клиент" prefWidth="150"/>
-                                <TableColumn fx:id="bookingStatusColumn" text="Статус" prefWidth="150"/>
-                            </columns>
-                        </TableView>
+                        <StackPane fx:id="bookingsStatePane">
+                            <TableView fx:id="bookingsTable" styleClass="card" prefHeight="400">
+                                <columns>
+                                    <TableColumn fx:id="bookingIdColumn" text="№" prefWidth="50"/>
+                                    <TableColumn fx:id="bookingFilmColumn" text="Фильм" prefWidth="200"/>
+                                    <TableColumn fx:id="bookingTimeColumn" text="Время брони" prefWidth="120"/>
+                                    <TableColumn fx:id="bookingSeatColumn" text="Место" prefWidth="150"/>
+                                    <TableColumn fx:id="bookingCustomerColumn" text="Клиент" prefWidth="150"/>
+                                    <TableColumn fx:id="bookingStatusColumn" text="Статус" prefWidth="150"/>
+                                </columns>
+                            </TableView>
+                        </StackPane>
 
                         <HBox spacing="12">
                             <Button fx:id="confirmBookingButton" text="Подтвердить бронирование"
@@ -111,6 +116,7 @@
                             <TextField fx:id="customerSearchField"
                                        promptText="Поиск по имени, телефону или email"
                                        prefWidth="320"/>
+                            <ComboBox fx:id="customerFilterCombo" promptText="Все клиенты" prefWidth="180"/>
                             <Button fx:id="searchCustomerButton" text="Найти" styleClass="button-primary"/>
                         </HBox>
 
@@ -134,15 +140,17 @@
                             <Button fx:id="registerCustomerButton" text="Зарегистрировать" styleClass="button-success"/>
                         </VBox>
 
-                        <TableView fx:id="customersTable" styleClass="card" prefHeight="500">
-                            <columns>
-                                <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="50"/>
-                                <TableColumn fx:id="customerNameColumn" text="ФИО" prefWidth="200"/>
-                                <TableColumn fx:id="customerPhoneColumn" text="Телефон" prefWidth="150"/>
-                                <TableColumn fx:id="customerVisitsColumn" text="Посещений" prefWidth="100"/>
-                                <TableColumn fx:id="customerTotalColumn" text="Всего потрачено" prefWidth="140"/>
-                            </columns>
-                        </TableView>
+                        <StackPane fx:id="customersStatePane">
+                            <TableView fx:id="customersTable" styleClass="card" prefHeight="500">
+                                <columns>
+                                    <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="50"/>
+                                    <TableColumn fx:id="customerNameColumn" text="ФИО" prefWidth="200"/>
+                                    <TableColumn fx:id="customerPhoneColumn" text="Телефон" prefWidth="150"/>
+                                    <TableColumn fx:id="customerVisitsColumn" text="Посещений" prefWidth="100"/>
+                                    <TableColumn fx:id="customerTotalColumn" text="Всего потрачено" prefWidth="140"/>
+                                </columns>
+                            </TableView>
+                        </StackPane>
                     </VBox>
                 </Tab>
 
@@ -166,7 +174,9 @@
 
                         <VBox spacing="10">
                             <Label text="Недавние продажи" styleClass="section-title"/>
-                            <TableView fx:id="recentTicketsTable" styleClass="card" prefHeight="300"/>
+                            <StackPane fx:id="recentTicketsStatePane">
+                                <TableView fx:id="recentTicketsTable" styleClass="card" prefHeight="300"/>
+                            </StackPane>
                         </VBox>
                     </VBox>
                 </Tab>
@@ -175,9 +185,9 @@
     </center>
 
     <bottom>
-        <HBox spacing="10" alignment="CENTER" styleClass="app-footer">
+        <HBox spacing="10" alignment="CENTER" styleClass="app-footer status-bar">
             <Label text="Статус: "/>
-            <Label text="Готов к работе" styleClass="status-ready"/>
+            <Label fx:id="connectionStatusLabel" text="Проверка..." styleClass="status-indicator"/>
             <Pane HBox.hgrow="ALWAYS"/>
             <Label text="© 2025 Кинотеатр 'КиноСфера'. Версия 1.0"/>
         </HBox>

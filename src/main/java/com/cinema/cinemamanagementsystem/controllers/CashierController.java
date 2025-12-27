@@ -4,6 +4,12 @@ import com.cinema.cinemamanagementsystem.dao.*;
 import com.cinema.cinemamanagementsystem.models.*;
 import com.cinema.cinemamanagementsystem.services.BookingService;
 import com.cinema.cinemamanagementsystem.config.DatabaseConfig;
+import com.cinema.cinemamanagementsystem.ui.ConnectionStatusMonitor;
+import com.cinema.cinemamanagementsystem.ui.OperationHistory;
+import com.cinema.cinemamanagementsystem.ui.OperationRecord;
+import com.cinema.cinemamanagementsystem.ui.UiDialogs;
+import com.cinema.cinemamanagementsystem.ui.ViewStateController;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -16,11 +22,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.layout.Priority;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
@@ -31,6 +40,10 @@ import javafx.util.Duration;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,13 +58,16 @@ public class CashierController implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(CashierController.class);
 
     // UI элементы
+    @FXML private BorderPane cashierRoot;
     @FXML private TabPane mainTabPane;
     @FXML private Label welcomeLabel;
     @FXML private Label currentTimeLabel;
+    @FXML private Label connectionStatusLabel;
 
     // Вкладка ПРОДАЖА
     @FXML private DatePicker datePicker;
     @FXML private TilePane filmsTilePane;
+    @FXML private ScrollPane showtimesScrollPane;
     @FXML private Label totalSelectedLabel;
 
     // Вкладка БРОНИРОВАНИЯ
@@ -73,6 +89,7 @@ public class CashierController implements Initializable {
     @FXML private TableColumn<Customer, Integer> customerVisitsColumn;
     @FXML private TableColumn<Customer, Double> customerTotalColumn;
     @FXML private TextField customerSearchField;
+    @FXML private ComboBox<String> customerFilterCombo;
     @FXML private Button searchCustomerButton;
     @FXML private TextField registrationNameField;
     @FXML private TextField registrationPhoneField;
@@ -83,6 +100,11 @@ public class CashierController implements Initializable {
     @FXML private TextField refundTicketIdField;
     @FXML private TextField refundReasonField;
     @FXML private Button refundButton;
+    @FXML private TableView<OperationRecord> recentTicketsTable;
+    @FXML private StackPane showtimesStatePane;
+    @FXML private StackPane bookingsStatePane;
+    @FXML private StackPane customersStatePane;
+    @FXML private StackPane recentTicketsStatePane;
 
     // DAO
     private final ShowtimeDAO showtimeDAO = new ShowtimeDAO();
@@ -96,11 +118,18 @@ public class CashierController implements Initializable {
     private ObservableList<Showtime> allShowtimesList = FXCollections.observableArrayList();
     private ObservableList<Ticket> bookingsList = FXCollections.observableArrayList();
     private ObservableList<Customer> customersList = FXCollections.observableArrayList();
+    private List<Customer> allCustomers = new ArrayList<>();
 
     // Текущие выборы
     private LocalDate selectedDate;
     private User currentUser;
     private Stage primaryStage;
+    private ViewStateController showtimesStateController;
+    private ViewStateController bookingsStateController;
+    private ViewStateController customersStateController;
+    private ViewStateController recentTicketsStateController;
+    private PauseTransition customerSearchDebounce;
+    private final ConnectionStatusMonitor connectionStatusMonitor = new ConnectionStatusMonitor();
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
@@ -118,6 +147,8 @@ public class CashierController implements Initializable {
         setupRefundsTab();
         startClock();
         startBookingTimer();
+        setupStateControllers();
+        setupAccelerators();
     }
 
     public void initializeData() {
@@ -127,17 +158,27 @@ public class CashierController implements Initializable {
 
         categoryMap = seatCategoryDAO.getAllCategories();
 
-        // Загружаем данные
-        loadAllShowtimes();
-        loadActiveBookings();
-        loadCustomers();
-
         // Устанавливаем сегодняшнюю дату
         selectedDate = LocalDate.now();
         datePicker.setValue(selectedDate);
 
+        // Загружаем данные
+        loadAllShowtimes();
+        loadActiveBookings();
+        loadCustomers();
+        setupRecentTicketsTable();
+
         // Загружаем фильмы на выбранную дату
         loadFilmsForDate(selectedDate);
+
+        customerSearchDebounce = new PauseTransition(Duration.millis(280));
+        customerSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            customerSearchDebounce.setOnFinished(event -> filterCustomers());
+            customerSearchDebounce.playFromStart();
+        });
+        customerFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterCustomers());
+
+        connectionStatusMonitor.attach(connectionStatusLabel);
     }
 
     // ===================== НАСТРОЙКА ВКЛАДОК =====================
@@ -203,6 +244,8 @@ public class CashierController implements Initializable {
         bookingsTable.setItems(bookingsList);
         confirmBookingButton.setOnAction(e -> confirmBooking());
         cancelBookingButton.setOnAction(e -> cancelBooking());
+        confirmBookingButton.setTooltip(new Tooltip("Подтвердить бронирование (Ctrl+S)"));
+        cancelBookingButton.setTooltip(new Tooltip("Отменить бронирование"));
     }
 
     private void setupCustomersTab() {
@@ -216,16 +259,48 @@ public class CashierController implements Initializable {
         searchCustomerButton.setOnAction(e -> searchCustomers());
         customerSearchField.setOnAction(e -> searchCustomers());
         registerCustomerButton.setOnAction(e -> registerCustomer());
+        customerFilterCombo.getItems().addAll("Все клиенты", "Частые (5+)", "Новые");
+        customerFilterCombo.setValue("Все клиенты");
+        searchCustomerButton.setTooltip(new Tooltip("Найти клиента (Ctrl+F)"));
+        registerCustomerButton.setTooltip(new Tooltip("Добавить нового клиента"));
     }
 
     private void setupRefundsTab() {
         refundButton.setOnAction(e -> processRefund());
+        refundButton.setTooltip(new Tooltip("Оформить возврат (Ctrl+S)"));
     }
 
     // ===================== ЗАГРУЗКА ДАННЫХ =====================
 
     private void loadAllShowtimes() {
-        allShowtimesList.setAll(showtimeDAO.getFutureShowtimes());
+        showtimesStateController.showLoading("Обновляем расписание");
+        Task<List<Showtime>> task = new Task<>() {
+            @Override
+            protected List<Showtime> call() {
+                return showtimeDAO.getFutureShowtimes();
+            }
+        };
+        task.setOnSucceeded(event -> {
+            allShowtimesList.setAll(task.getValue());
+            if (allShowtimesList.isEmpty()) {
+                showtimesStateController.showEmpty(
+                        "Сеансов нет",
+                        "На выбранную дату еще нет расписания",
+                        "Обновить",
+                        this::loadAllShowtimes
+                );
+            } else {
+                showtimesStateController.showContent();
+            }
+            loadFilmsForDate(selectedDate);
+        });
+        task.setOnFailed(event -> showtimesStateController.showError(
+                "Не удалось загрузить расписание",
+                this::loadAllShowtimes
+        ));
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void loadFilmsForDate(LocalDate date) {
@@ -265,11 +340,15 @@ public class CashierController implements Initializable {
             filmsTilePane.getChildren().add(filmCard);
         }
 
-        // Если фильмов нет
         if (films.isEmpty()) {
-            Label noFilmsLabel = new Label("Нет сеансов на выбранную дату");
-            noFilmsLabel.getStyleClass().add("showtime-empty");
-            filmsTilePane.getChildren().add(noFilmsLabel);
+            showtimesStateController.showEmpty(
+                    "Нет сеансов на выбранную дату",
+                    "Выберите другую дату или обновите расписание",
+                    "Обновить",
+                    this::reloadData
+            );
+        } else {
+            showtimesStateController.showContent();
         }
     }
 
@@ -373,16 +452,61 @@ public class CashierController implements Initializable {
             stage.show();
         } catch (Exception e) {
             logger.error("Ошибка при открытии окна продажи: {}", e.getMessage(), e);
-            showAlert("Ошибка", "Не удалось открыть окно продажи", Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось открыть окно продажи");
         }
     }
 
     private void loadActiveBookings() {
-        bookingsList.setAll(ticketDAO.getActiveBookings(false));
+        bookingsStateController.showLoading("Загружаем бронирования");
+        Task<List<Ticket>> task = new Task<>() {
+            @Override
+            protected List<Ticket> call() {
+                return ticketDAO.getActiveBookings(false);
+            }
+        };
+        task.setOnSucceeded(event -> {
+            bookingsList.setAll(task.getValue());
+            if (bookingsList.isEmpty()) {
+                bookingsStateController.showEmpty(
+                        "Бронирований нет",
+                        "Новые брони появятся здесь автоматически",
+                        null,
+                        null
+                );
+            } else {
+                bookingsStateController.showContent();
+            }
+        });
+        task.setOnFailed(event -> bookingsStateController.showError(
+                "Не удалось загрузить бронирования",
+                this::loadActiveBookings
+        ));
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void loadCustomers() {
-        customersList.setAll(customerDAO.getAllCustomers());
+        customersStateController.showLoading("Загружаем клиентов");
+        Task<List<Customer>> task = new Task<>() {
+            @Override
+            protected List<Customer> call() {
+                return customerDAO.getAllCustomers();
+            }
+        };
+        task.setOnSucceeded(event -> {
+            allCustomers = new ArrayList<>(task.getValue());
+            filterCustomers();
+        });
+        task.setOnFailed(event -> customersStateController.showError(
+                "Не удалось загрузить клиентов",
+                this::loadCustomers
+        ));
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private boolean hasShowtimesOnDate(LocalDate date) {
@@ -402,17 +526,22 @@ public class CashierController implements Initializable {
         String email = registrationEmailField.getText().trim();
 
         if (name.isEmpty() || phone.isEmpty()) {
-            showAlert("Ошибка", "Заполните имя и телефон клиента", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Ошибка", "Заполните имя и телефон клиента");
+            return;
+        }
+
+        if (!phone.matches("\\\\+?\\\\d{10,15}")) {
+            UiDialogs.showInfoDialog(primaryStage, "Ошибка", "Введите корректный номер телефона");
             return;
         }
 
         Customer customer = customerDAO.registerCustomer(name, phone, email.isEmpty() ? null : email);
         if (customer == null) {
-            showAlert("Ошибка", "Не удалось зарегистрировать клиента", Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось зарегистрировать клиента");
             return;
         }
 
-        showAlert("Успех", "Клиент зарегистрирован", Alert.AlertType.INFORMATION);
+        UiDialogs.successToast(primaryStage, "Клиент зарегистрирован");
         registrationNameField.clear();
         registrationPhoneField.clear();
         registrationEmailField.clear();
@@ -424,63 +553,61 @@ public class CashierController implements Initializable {
     private void confirmBooking() {
         Ticket selectedBooking = bookingsTable.getSelectionModel().getSelectedItem();
         if (selectedBooking == null) {
-            showAlert("Предупреждение", "Выберите бронирование", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Бронирование", "Выберите бронирование");
             return;
         }
 
         try {
             int paymentMethodId = 1;
 
-            if (bookingService.confirmBooking(
+                if (bookingService.confirmBooking(
                     selectedBooking.getTicketId(),
                     currentUser.getUserId(),
                     paymentMethodId)) {
 
-                showAlert("Успех", "Бронирование подтверждено", Alert.AlertType.INFORMATION);
+                UiDialogs.successToast(primaryStage, "Бронирование подтверждено");
+                OperationHistory.addRecord(new OperationRecord(
+                        LocalDateTime.now(),
+                        "Подтверждение бронирования",
+                        selectedBooking.getFinalPrice(),
+                        "#" + selectedBooking.getTicketId()
+                ));
                 reloadData();
             } else {
-                showAlert("Ошибка", "Не удалось подтвердить", Alert.AlertType.ERROR);
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось подтвердить");
             }
 
         } catch (Exception e) {
             logger.error("Ошибка подтверждения: {}", e.getMessage());
-            showAlert("Ошибка", e.getMessage(), Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", e.getMessage());
         }
     }
 
     private void cancelBooking() {
         Ticket selectedBooking = bookingsTable.getSelectionModel().getSelectedItem();
         if (selectedBooking == null) {
-            showAlert("Предупреждение", "Выберите бронирование", Alert.AlertType.WARNING);
+            UiDialogs.showInfoDialog(primaryStage, "Бронирование", "Выберите бронирование");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Отмена бронирования");
-        confirm.setHeaderText("Отменить #" + selectedBooking.getTicketId() + "?");
+        if (UiDialogs.confirmDialog(primaryStage,
+                "Отмена бронирования",
+                "Отменить #" + selectedBooking.getTicketId() + "?",
+                "Отменить")) {
+            if (ticketDAO.updateTicketStatus(
+                    selectedBooking.getTicketId(),
+                    DatabaseConfig.TicketStatus.REFUND)) {
 
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                if (ticketDAO.updateTicketStatus(
-                        selectedBooking.getTicketId(),
-                        DatabaseConfig.TicketStatus.REFUND)) {
-
-                    showAlert("Успех", "Бронирование отменено", Alert.AlertType.INFORMATION);
-                    reloadData();
-                } else {
-                    showAlert("Ошибка", "Не удалось отменить", Alert.AlertType.ERROR);
-                }
+                UiDialogs.successToast(primaryStage, "Бронирование отменено");
+                reloadData();
+            } else {
+                UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось отменить");
             }
-        });
+        }
     }
 
     private void searchCustomers() {
-        String text = customerSearchField.getText().trim();
-        if (text.isEmpty()) {
-            loadCustomers();
-        } else {
-            customersList.setAll(customerDAO.searchCustomers(text));
-        }
+        filterCustomers();
     }
 
     private void processRefund() {
@@ -489,29 +616,32 @@ public class CashierController implements Initializable {
             String reason = refundReasonField.getText().trim();
 
             if (reason.isEmpty()) {
-                showAlert("Ошибка", "Укажите причину", Alert.AlertType.WARNING);
+                UiDialogs.showInfoDialog(primaryStage, "Возврат", "Укажите причину");
                 return;
             }
 
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Возврат билета");
-            confirm.setHeaderText("Вернуть билет #" + ticketId + "?");
-
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    if (bookingService.refundTicket(ticketId, currentUser.getUserId())) {
-                        showAlert("Успех", "Возврат оформлен", Alert.AlertType.INFORMATION);
-                        refundTicketIdField.clear();
-                        refundReasonField.clear();
-                        reloadData();
-                    } else {
-                        showAlert("Ошибка", "Не удалось оформить возврат", Alert.AlertType.ERROR);
-                    }
+            if (UiDialogs.confirmDialog(primaryStage,
+                    "Возврат билета",
+                    "Вернуть билет #" + ticketId + "?",
+                    "Вернуть")) {
+                if (bookingService.refundTicket(ticketId, currentUser.getUserId())) {
+                    UiDialogs.successToast(primaryStage, "Возврат оформлен");
+                    OperationHistory.addRecord(new OperationRecord(
+                            LocalDateTime.now(),
+                            "Возврат билета",
+                            0,
+                            "#" + ticketId
+                    ));
+                    refundTicketIdField.clear();
+                    refundReasonField.clear();
+                    reloadData();
+                } else {
+                    UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Не удалось оформить возврат");
                 }
-            });
+            }
 
         } catch (NumberFormatException e) {
-            showAlert("Ошибка", "Некорректный номер билета", Alert.AlertType.ERROR);
+            UiDialogs.showErrorDialog(primaryStage, "Ошибка", "Некорректный номер билета");
         }
     }
 
@@ -535,13 +665,6 @@ public class CashierController implements Initializable {
         timer.play();
     }
 
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     @FXML
     private void handleLogout() {
@@ -562,6 +685,134 @@ public class CashierController implements Initializable {
 
         } catch (Exception e) {
             logger.error("Ошибка выхода: {}", e.getMessage());
+        }
+    }
+
+    private void filterCustomers() {
+        String searchText = customerSearchField.getText() == null ? "" : customerSearchField.getText().trim().toLowerCase();
+        String filter = customerFilterCombo.getValue();
+
+        List<Customer> filtered = allCustomers.stream()
+                .filter(customer -> {
+                    boolean matchesSearch = searchText.isEmpty()
+                            || (customer.getName() != null && customer.getName().toLowerCase().contains(searchText))
+                            || (customer.getPhone() != null && customer.getPhone().toLowerCase().contains(searchText))
+                            || (customer.getEmail() != null && customer.getEmail().toLowerCase().contains(searchText));
+                    boolean matchesFilter = true;
+                    if ("Частые (5+)".equals(filter)) {
+                        matchesFilter = customer.getVisitCount() >= 5;
+                    } else if ("Новые".equals(filter)) {
+                        matchesFilter = customer.getVisitCount() <= 1;
+                    }
+                    return matchesSearch && matchesFilter;
+                })
+                .collect(Collectors.toList());
+
+        customersList.setAll(filtered);
+        if (filtered.isEmpty()) {
+            customersStateController.showEmpty(
+                    "Клиенты не найдены",
+                    "Измените параметры поиска или фильтра",
+                    "Сбросить",
+                    this::resetCustomerFilters
+            );
+        } else {
+            customersStateController.showContent();
+        }
+    }
+
+    private void resetCustomerFilters() {
+        customerSearchField.clear();
+        customerFilterCombo.setValue("Все клиенты");
+        customersList.setAll(allCustomers);
+        if (customersList.isEmpty()) {
+            customersStateController.showEmpty(
+                    "Список клиентов пуст",
+                    "Добавьте первого клиента через форму регистрации",
+                    "Добавить клиента",
+                    registrationNameField::requestFocus
+            );
+        } else {
+            customersStateController.showContent();
+        }
+    }
+
+    private void setupStateControllers() {
+        showtimesStateController = new ViewStateController(showtimesStatePane, showtimesScrollPane);
+        bookingsStateController = new ViewStateController(bookingsStatePane, bookingsTable);
+        customersStateController = new ViewStateController(customersStatePane, customersTable);
+        recentTicketsStateController = new ViewStateController(recentTicketsStatePane, recentTicketsTable);
+        recentTicketsStateController.showEmpty(
+                "История пуста",
+                "Последние операции появятся после продаж",
+                null,
+                null
+        );
+    }
+
+    private void setupRecentTicketsTable() {
+        TableColumn<OperationRecord, String> timeColumn = new TableColumn<>("Время");
+        timeColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getFormattedTime()));
+        timeColumn.setPrefWidth(120);
+
+        TableColumn<OperationRecord, String> descriptionColumn = new TableColumn<>("Операция");
+        descriptionColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getDescription()));
+        descriptionColumn.setPrefWidth(200);
+
+        TableColumn<OperationRecord, String> amountColumn = new TableColumn<>("Сумма");
+        amountColumn.setCellValueFactory(cell -> new SimpleStringProperty(String.format("%.2f", cell.getValue().getAmount())));
+        amountColumn.setPrefWidth(100);
+
+        TableColumn<OperationRecord, String> ticketsColumn = new TableColumn<>("Билеты");
+        ticketsColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getTicketIds()));
+        ticketsColumn.setPrefWidth(160);
+
+        recentTicketsTable.getColumns().setAll(timeColumn, descriptionColumn, amountColumn, ticketsColumn);
+        recentTicketsTable.setItems(OperationHistory.getRecords());
+
+        updateRecentTicketsState();
+        OperationHistory.getRecords().addListener((ListChangeListener<OperationRecord>) change -> updateRecentTicketsState());
+    }
+
+    private void updateRecentTicketsState() {
+        if (OperationHistory.getRecords().isEmpty()) {
+            recentTicketsStateController.showEmpty(
+                    "История пуста",
+                    "Последние операции появятся после продаж",
+                    null,
+                    null
+            );
+        } else {
+            recentTicketsStateController.showContent();
+        }
+    }
+
+    private void setupAccelerators() {
+        cashierRoot.sceneProperty().addListener((obs, oldScene, scene) -> {
+            if (scene == null) {
+                return;
+            }
+
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), this::reloadData);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN), this::focusSearchField);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), this::performPrimaryAction);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ESCAPE), this::handleLogout);
+        });
+    }
+
+    private void focusSearchField() {
+        int selectedIndex = mainTabPane.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == 2) {
+            customerSearchField.requestFocus();
+        }
+    }
+
+    private void performPrimaryAction() {
+        int selectedIndex = mainTabPane.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == 1) {
+            confirmBooking();
+        } else if (selectedIndex == 3) {
+            processRefund();
         }
     }
 }

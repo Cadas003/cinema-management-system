@@ -9,7 +9,8 @@
             fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
             prefHeight="520.0" prefWidth="840.0"
             styleClass="app-root ticket-compact"
-            stylesheets="@style.css">
+            stylesheets="@style.css"
+            fx:id="ticketSaleRoot">
 
     <top>
         <VBox spacing="8" styleClass="content-wrapper compact-section">
@@ -36,7 +37,9 @@
                 <Label text="Выбор места" styleClass="section-title"/>
                 <VBox spacing="6" styleClass="seat-card compact-card">
                     <Label text="Экран" styleClass="screen" alignment="CENTER"/>
-                    <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                    <StackPane fx:id="seatStatePane">
+                        <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                    </StackPane>
                 </VBox>
             </VBox>
 
