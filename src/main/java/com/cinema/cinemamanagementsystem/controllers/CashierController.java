@@ -57,9 +57,17 @@ public class CashierController implements Initializable {
     @FXML private Label selectedHallLabel;
     @FXML private Label selectedPriceLabel;
     @FXML private GridPane seatGrid;
-    @FXML private TextField customerNameField;
-    @FXML private TextField customerPhoneField;
-    @FXML private TextField customerEmailField;
+    @FXML private RadioButton guestCustomerRadio;
+    @FXML private RadioButton existingCustomerRadio;
+    @FXML private TextField existingCustomerSearchField;
+    @FXML private Button existingCustomerSearchButton;
+    @FXML private Button existingCustomerClearSearchButton;
+    @FXML private TableView<Customer> existingCustomersTable;
+    @FXML private TableColumn<Customer, String> existingCustomerNameColumn;
+    @FXML private TableColumn<Customer, String> existingCustomerPhoneColumn;
+    @FXML private Label selectedExistingCustomerLabel;
+    @FXML private Button clearExistingCustomerButton;
+    @FXML private VBox existingCustomerBox;
     @FXML private RadioButton immediateSaleRadio;
     @FXML private RadioButton bookingRadio;
     @FXML private ComboBox<String> paymentMethodCombo;
@@ -87,6 +95,10 @@ public class CashierController implements Initializable {
     @FXML private TableColumn<Customer, Double> customerTotalColumn;
     @FXML private TextField customerSearchField;
     @FXML private Button searchCustomerButton;
+    @FXML private TextField registerNameField;
+    @FXML private TextField registerPhoneField;
+    @FXML private TextField registerEmailField;
+    @FXML private Button registerCustomerButton;
 
     // Вкладка ВОЗВРАТЫ
     @FXML private TextField refundTicketIdField;
@@ -105,6 +117,7 @@ public class CashierController implements Initializable {
     private ObservableList<Showtime> allShowtimesList = FXCollections.observableArrayList();
     private ObservableList<Ticket> bookingsList = FXCollections.observableArrayList();
     private ObservableList<Customer> customersList = FXCollections.observableArrayList();
+    private ObservableList<Customer> existingCustomersList = FXCollections.observableArrayList();
 
     // Текущие выборы
     private LocalDate selectedDate;
@@ -161,6 +174,29 @@ public class CashierController implements Initializable {
         immediateSaleRadio.setToggleGroup(saleTypeGroup);
         bookingRadio.setToggleGroup(saleTypeGroup);
         immediateSaleRadio.setSelected(true);
+        saleTypeGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> updateTotalSelected());
+
+        ToggleGroup customerTypeGroup = new ToggleGroup();
+        guestCustomerRadio.setToggleGroup(customerTypeGroup);
+        existingCustomerRadio.setToggleGroup(customerTypeGroup);
+        guestCustomerRadio.setSelected(true);
+        customerTypeGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> {
+            updateCustomerInputsVisibility();
+            updateTotalSelected();
+        });
+
+        existingCustomerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        existingCustomerPhoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        existingCustomersTable.setItems(existingCustomersList);
+        existingCustomersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            updateSelectedExistingCustomer(newV);
+            updateTotalSelected();
+        });
+        existingCustomerSearchButton.setOnAction(e -> searchExistingCustomers());
+        existingCustomerSearchField.setOnAction(e -> searchExistingCustomers());
+        existingCustomerSearchField.textProperty().addListener((obs, oldV, newV) -> searchExistingCustomers());
+        existingCustomerClearSearchButton.setOnAction(e -> clearExistingCustomerSearch());
+        clearExistingCustomerButton.setOnAction(e -> clearExistingCustomerSelection());
 
         // Настройка DatePicker
         setupDatePicker();
@@ -169,12 +205,8 @@ public class CashierController implements Initializable {
         sellTicketButton.setOnAction(e -> sellTickets());
         bookTicketButton.setOnAction(e -> bookTickets());
 
-        // Валидация телефона
-        customerPhoneField.textProperty().addListener((obs, oldV, newV) -> {
-            if (!newV.matches("\\+?\\d*")) customerPhoneField.setText(oldV);
-        });
-
         // Обновление суммы
+        updateCustomerInputsVisibility();
         updateTotalSelected();
     }
 
@@ -239,6 +271,10 @@ public class CashierController implements Initializable {
         customersTable.setItems(customersList);
         searchCustomerButton.setOnAction(e -> searchCustomers());
         customerSearchField.setOnAction(e -> searchCustomers());
+        registerCustomerButton.setOnAction(e -> registerCustomer());
+        registerPhoneField.textProperty().addListener((obs, oldV, newV) -> {
+            if (!newV.matches("\\+?\\d*")) registerPhoneField.setText(oldV);
+        });
     }
 
     private void setupRefundsTab() {
@@ -414,6 +450,7 @@ public class CashierController implements Initializable {
 
     private void loadCustomers() {
         customersList.setAll(customerDAO.getAllCustomers());
+        existingCustomersList.setAll(customersList);
     }
 
     private void loadPaymentMethods() {
@@ -645,15 +682,22 @@ public class CashierController implements Initializable {
 
     private void updateTotalSelected() {
         int count = selectedSeatIds.size();
-        double pricePerTicket = selectedShowtime != null ? selectedShowtime.getFinalPrice() : 0;
+        double pricePerTicket = 0;
+        if (selectedShowtime != null) {
+            boolean isRegisteredCustomer = isRegisteredCustomerSelected();
+            pricePerTicket = bookingService.calculateFinalPrice(
+                    selectedShowtime.getShowtimeId(),
+                    isBookingSelected(),
+                    isRegisteredCustomer
+            );
+        }
         double total = count * pricePerTicket;
 
         totalSelectedLabel.setText(String.format("Выбрано: %d мест | Итого: %.2f руб.", count, total));
 
         // Активируем/деактивируем кнопки продажи
-        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty() &&
-                !customerNameField.getText().trim().isEmpty() &&
-                !customerPhoneField.getText().trim().isEmpty();
+        boolean canSell = selectedShowtime != null && !selectedSeatIds.isEmpty()
+                && isCustomerInputValid();
 
         sellTicketButton.setDisable(!canSell);
         bookTicketButton.setDisable(!canSell);
@@ -668,13 +712,14 @@ public class CashierController implements Initializable {
             List<Ticket> soldTickets = new ArrayList<>();
 
             for (Integer seatId : selectedSeatIds) {
+                Customer selectedCustomer = existingCustomerRadio.isSelected()
+                        ? existingCustomersTable.getSelectionModel().getSelectedItem()
+                        : null;
                 Ticket ticket = bookingService.sellTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
-                        customerNameField.getText().trim(),
-                        customerPhoneField.getText().trim(),
-                        customerEmailField.getText().trim()
+                        selectedCustomer != null ? selectedCustomer.getCustomerId() : null
                 );
 
                 if (ticket != null) {
@@ -708,13 +753,14 @@ public class CashierController implements Initializable {
             List<Ticket> bookedTickets = new ArrayList<>();
 
             for (Integer seatId : selectedSeatIds) {
+                Customer selectedCustomer = existingCustomerRadio.isSelected()
+                        ? existingCustomersTable.getSelectionModel().getSelectedItem()
+                        : null;
                 Ticket ticket = bookingService.bookTicket(
                         selectedShowtime.getShowtimeId(),
                         seatId,
                         currentUser.getUserId(),
-                        customerNameField.getText().trim(),
-                        customerPhoneField.getText().trim(),
-                        customerEmailField.getText().trim()
+                        selectedCustomer != null ? selectedCustomer.getCustomerId() : null
                 );
 
                 if (ticket != null) {
@@ -753,8 +799,9 @@ public class CashierController implements Initializable {
     private void validateSaleForm() {
         if (selectedShowtime == null) throw new IllegalArgumentException("Выберите сеанс");
         if (selectedSeatIds.isEmpty()) throw new IllegalArgumentException("Выберите места");
-        if (customerNameField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите имя клиента");
-        if (customerPhoneField.getText().trim().isEmpty()) throw new IllegalArgumentException("Введите телефон");
+        if (!isCustomerInputValid()) {
+            throw new IllegalArgumentException("Выберите клиента или оформите как гостя");
+        }
 
         // Проверяем, что выбранные места еще свободны
         List<Integer> takenSeats = showtimeDAO.getTakenSeats(selectedShowtime.getShowtimeId());
@@ -780,7 +827,96 @@ public class CashierController implements Initializable {
         int freeSeats = totalSeats - takenSeats;
 
         selectedPriceLabel.setText(String.format("Цена: %.2f руб. | Свободно: %d/%d",
-                selectedShowtime.getFinalPrice(), freeSeats, totalSeats));
+                bookingService.calculateFinalPrice(
+                        selectedShowtime.getShowtimeId(),
+                        isBookingSelected(),
+                        isRegisteredCustomerSelected()
+                ),
+                freeSeats, totalSeats));
+    }
+
+    private boolean isCustomerInputValid() {
+        if (guestCustomerRadio.isSelected()) {
+            return true;
+        }
+        if (existingCustomerRadio.isSelected()) {
+            return existingCustomersTable.getSelectionModel().getSelectedItem() != null;
+        }
+        return false;
+    }
+
+    private boolean isBookingSelected() {
+        return bookingRadio.isSelected();
+    }
+
+    private boolean isRegisteredCustomerSelected() {
+        if (existingCustomerRadio.isSelected()) {
+            return existingCustomersTable.getSelectionModel().getSelectedItem() != null;
+        }
+        return false;
+    }
+
+    private void updateCustomerInputsVisibility() {
+        boolean showExisting = existingCustomerRadio.isSelected();
+
+        existingCustomerBox.setVisible(showExisting);
+        existingCustomerBox.setManaged(showExisting);
+
+        if (!showExisting) {
+            clearExistingCustomerSelection();
+        }
+    }
+
+    private void updateSelectedExistingCustomer(Customer customer) {
+        if (customer == null) {
+            selectedExistingCustomerLabel.setText("Клиент не выбран");
+        } else {
+            selectedExistingCustomerLabel.setText("Выбран: " + customer.getName());
+        }
+    }
+
+    private void clearExistingCustomerSelection() {
+        existingCustomersTable.getSelectionModel().clearSelection();
+        updateSelectedExistingCustomer(null);
+    }
+
+    private void clearExistingCustomerSearch() {
+        existingCustomerSearchField.clear();
+        existingCustomersList.setAll(customersList);
+        clearExistingCustomerSelection();
+    }
+
+    private void searchExistingCustomers() {
+        String text = existingCustomerSearchField.getText().trim();
+        if (text.isEmpty()) {
+            existingCustomersList.setAll(customersList);
+        } else {
+            existingCustomersList.setAll(customerDAO.searchCustomers(text));
+        }
+    }
+
+    private void registerCustomer() {
+        String name = registerNameField.getText().trim();
+        String phone = registerPhoneField.getText().trim();
+        String email = registerEmailField.getText().trim();
+
+        if (name.isEmpty() || phone.isEmpty()) {
+            showAlert("Предупреждение", "Введите имя и телефон", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Customer customer = customerDAO.findOrCreateCustomer(name, phone, email);
+        if (customer == null) {
+            showAlert("Ошибка", "Не удалось зарегистрировать клиента", Alert.AlertType.ERROR);
+            return;
+        }
+
+        showAlert("Успех", "Клиент зарегистрирован", Alert.AlertType.INFORMATION);
+        registerNameField.clear();
+        registerPhoneField.clear();
+        registerEmailField.clear();
+        loadCustomers();
+        searchExistingCustomers();
     }
 
     private void clearFilmSelection() {
@@ -811,9 +947,9 @@ public class CashierController implements Initializable {
     }
 
     private void clearSaleForm() {
-        customerNameField.clear();
-        customerPhoneField.clear();
-        customerEmailField.clear();
+        clearExistingCustomerSearch();
+        guestCustomerRadio.setSelected(true);
+        updateCustomerInputsVisibility();
         selectedSeatIds.clear();
         updateTotalSelected();
 

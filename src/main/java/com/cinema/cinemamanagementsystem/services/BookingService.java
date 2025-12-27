@@ -19,7 +19,7 @@ public class BookingService {
 
     // Продажа билета (без бронирования)
     public Ticket sellTicket(int showtimeId, int seatId, int userId,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Integer customerId) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -28,17 +28,14 @@ public class BookingService {
             }
 
 
-            // 2. Находим или создаем клиента
-            Customer customer = customerDAO.findOrCreateCustomer(customerName, customerPhone, customerEmail);
-            if (customer == null) {
-                throw new IllegalStateException("Не удалось создать клиента");
-            }
+            // 2. Находим клиента (если выбран)
+            Customer customer = resolveCustomer(customerId);
 
             // 3. Создаем билет со статусом "оплачен"
             Ticket ticket = new Ticket();
             ticket.setShowtimeId(showtimeId);
             ticket.setSeatId(seatId);
-            ticket.setCustomerId(customer.getCustomerId());
+            ticket.setCustomerId(customer != null ? customer.getCustomerId() : 0);
             ticket.setUserId(userId);
             ticket.setStatusId(DatabaseConfig.TicketStatus.PAID);
             ticket.setCreatedAt(LocalDateTime.now());
@@ -54,7 +51,7 @@ public class BookingService {
             Payment payment = new Payment();
             payment.setTicketId(ticketId);
             payment.setUserId(userId);
-            payment.setAmount(calculateFinalPrice(showtimeId, false));
+            payment.setAmount(calculateFinalPrice(showtimeId, false, customer != null));
             payment.setPaymentTime(LocalDateTime.now());
             payment.setMethodId(1); // Банковская карта по умолчанию
 
@@ -62,7 +59,8 @@ public class BookingService {
                 throw new IllegalStateException("Не удалось зарегистрировать платеж");
             }
 
-            logger.info("Билет #{} успешно продан клиенту {}", ticketId, customer.getName());
+            logger.info("Билет #{} успешно продан клиенту {}", ticketId,
+                    customer != null ? customer.getName() : "без регистрации");
             return ticket;
 
         } catch (Exception e) {
@@ -73,7 +71,7 @@ public class BookingService {
 
     // Бронирование билета
     public Ticket bookTicket(int showtimeId, int seatId, int userId,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Integer customerId) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -82,17 +80,14 @@ public class BookingService {
             }
 
 
-            // 2. Находим или создаем клиента
-            Customer customer = customerDAO.findOrCreateCustomer(customerName, customerPhone, customerEmail);
-            if (customer == null) {
-                throw new IllegalStateException("Не удалось создать клиента");
-            }
+            // 2. Находим клиента (если выбран)
+            Customer customer = resolveCustomer(customerId);
 
             // 3. Создаем билет со статусом "забронирован"
             Ticket ticket = new Ticket();
             ticket.setShowtimeId(showtimeId);
             ticket.setSeatId(seatId);
-            ticket.setCustomerId(customer.getCustomerId());
+            ticket.setCustomerId(customer != null ? customer.getCustomerId() : 0);
             ticket.setUserId(userId);
             ticket.setStatusId(DatabaseConfig.TicketStatus.BOOKED);
             ticket.setCreatedAt(LocalDateTime.now());
@@ -105,7 +100,8 @@ public class BookingService {
 
             ticket.setTicketId(ticketId);
 
-            logger.info("Бронирование #{} создано для клиента {}", ticketId, customer.getName());
+            logger.info("Бронирование #{} создано для клиента {}", ticketId,
+                    customer != null ? customer.getName() : "без регистрации");
             return ticket;
 
         } catch (Exception e) {
@@ -138,7 +134,7 @@ public class BookingService {
             }
 
             // 4. Создаем платеж с доплатой 15%
-            double finalPrice = calculateFinalPrice(ticket.getShowtimeId(), true);
+            double finalPrice = calculateFinalPrice(ticket.getShowtimeId(), true, ticket.getCustomerId() > 0);
 
             Payment payment = new Payment();
             payment.setTicketId(ticketId);
@@ -205,22 +201,38 @@ public class BookingService {
     }
 
     // Расчет итоговой цены
-    private double calculateFinalPrice(int showtimeId, boolean isBooking) {
-        // Здесь должна быть логика расчета цены с учетом:
-        // - базовой цены сеанса
-        // - коэффициента времени (утро/вечер)
-        // - типа зала
-        // - категории места
-        // - доплаты за бронирование (15% если isBooking = true)
-
-        // Временно возвращаем фиксированную цену
-        double basePrice = 300.0;
-
-        if (isBooking) {
-            return basePrice * (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
+    public double calculateFinalPrice(int showtimeId, boolean isBooking, boolean isRegisteredCustomer) {
+        Showtime showtime = showtimeDAO.getShowtimeById(showtimeId);
+        if (showtime == null) {
+            throw new IllegalStateException("Сеанс не найден для расчета цены");
         }
 
-        return basePrice;
+        double coefficient = isRegisteredCustomer
+                ? showtime.getCoefficient()
+                : DatabaseConfig.GUEST_PRICE_COEFFICIENT;
+
+        if (coefficient == 0) {
+            coefficient = 1.0;
+        }
+
+        double finalPrice = showtime.getBasePrice() * coefficient;
+
+        if (isBooking) {
+            finalPrice *= (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
+        }
+
+        return finalPrice;
+    }
+
+    private Customer resolveCustomer(Integer customerId) {
+        if (customerId == null) {
+            return null;
+        }
+        Customer customer = customerDAO.getCustomerById(customerId);
+        if (customer == null) {
+            throw new IllegalStateException("Выбранный клиент не найден");
+        }
+        return customer;
     }
 
     // Автоматическая отмена истекших бронирований

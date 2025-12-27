@@ -31,7 +31,7 @@ public class Main extends Application {
             // Настраиваем главное окно
             Scene scene = new Scene(root, 900, 600);
             scene.getStylesheets().add(Objects.requireNonNull(
-                    getClass().getResource("/com/cinema/cinemamanagementsystem/style.css")).toExternalForm());
+                    getClass().getResource("/com/cinema/styles/styles.css")).toExternalForm());
 
             primaryStage.setTitle("Кинотеатр 'КиноСфера' - Система управления");
            // primaryStage.getIcons().add(new Image(

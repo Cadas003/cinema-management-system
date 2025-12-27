@@ -86,7 +86,7 @@ public class LoginController {
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add(Objects.requireNonNull(
-                    getClass().getResource("/com/cinema/cinemamanagementsystem/style.css")).toExternalForm());
+                    getClass().getResource("/com/cinema/styles/styles.css")).toExternalForm());
 
             primaryStage.setTitle("Панель администратора - Кинотеатр 'КиноСфера'");
             primaryStage.setScene(scene);
@@ -110,7 +110,7 @@ public class LoginController {
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add(Objects.requireNonNull(
-                    getClass().getResource("/com/cinema/cinemamanagementsystem/style.css")).toExternalForm());
+                    getClass().getResource("/com/cinema/styles/styles.css")).toExternalForm());
 
             primaryStage.setTitle("Панель кассира - Кинотеатр 'КиноСфера'");
             primaryStage.setScene(scene);

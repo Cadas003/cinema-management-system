@@ -214,7 +214,9 @@ public class TicketDAO {
                 " (" + rs.getString("seat_category") + ")";
         ticket.setSeatInfo(seatInfo);
 
-        ticket.setCustomerId(rs.getInt("customer_id"));
+        int customerId = rs.getInt("customer_id");
+        boolean hasCustomer = !rs.wasNull();
+        ticket.setCustomerId(hasCustomer ? customerId : 0);
         ticket.setCustomerName(rs.getString("customer_name"));
         ticket.setUserId(rs.getInt("user_id"));
         ticket.setUserName(rs.getString("user_name"));
@@ -224,8 +226,12 @@ public class TicketDAO {
 
         // Рассчитываем финальную цену
         double basePrice = rs.getDouble("base_price");
-        double coefficient = rs.getDouble("coefficient");
-        if (coefficient == 0) coefficient = 1.0;
+        double coefficient = hasCustomer
+                ? rs.getDouble("coefficient")
+                : DatabaseConfig.GUEST_PRICE_COEFFICIENT;
+        if (coefficient == 0) {
+            coefficient = 1.0;
+        }
 
         double finalPrice = basePrice * coefficient;
         // Если билет был забронирован, добавляем доплату 15%

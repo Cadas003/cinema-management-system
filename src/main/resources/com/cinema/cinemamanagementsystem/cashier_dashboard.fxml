@@ -96,34 +96,46 @@
 
                             <!-- ПРАВАЯ КОЛОНКА: Данные клиента -->
                             <VBox spacing="15" prefWidth="350">
-                                <Label text="Данные клиента:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Данные клиента:" styleClass="section-title"/>
 
                                 <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
-                                    <VBox spacing="8">
-                                        <Label text="ФИО клиента:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerNameField"
-                                                   promptText="Введите ФИО"
-                                                   prefWidth="320"/>
+                                    <Label text="Тип клиента:" styleClass="section-title"/>
+                                    <VBox spacing="6">
+                                        <RadioButton fx:id="guestCustomerRadio" text="Гость"/>
+                                        <RadioButton fx:id="existingCustomerRadio" text="Существующий клиент"/>
                                     </VBox>
 
-                                    <VBox spacing="8">
-                                        <Label text="Телефон:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerPhoneField"
-                                                   promptText="+7XXXXXXXXXX"
-                                                   prefWidth="320"/>
-                                    </VBox>
+                                    <VBox fx:id="existingCustomerBox" spacing="10">
+                                        <Label text="Поиск клиента:" style="-fx-font-weight: bold;"/>
+                                        <HBox spacing="8">
+                                            <TextField fx:id="existingCustomerSearchField"
+                                                       promptText="Имя, телефон или email"
+                                                       prefWidth="220"/>
+                                            <Button fx:id="existingCustomerSearchButton"
+                                                    text="Найти"
+                                                    styleClass="button-primary"/>
+                                            <Button fx:id="existingCustomerClearSearchButton"
+                                                    text="Сбросить"
+                                                    styleClass="button-warning"/>
+                                        </HBox>
 
-                                    <VBox spacing="8">
-                                        <Label text="Email (необязательно):" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerEmailField"
-                                                   promptText="email@example.com"
-                                                   prefWidth="320"/>
+                                        <TableView fx:id="existingCustomersTable" prefHeight="160">
+                                            <columns>
+                                                <TableColumn fx:id="existingCustomerNameColumn" text="ФИО" prefWidth="140"/>
+                                                <TableColumn fx:id="existingCustomerPhoneColumn" text="Телефон" prefWidth="120"/>
+                                            </columns>
+                                        </TableView>
+
+                                        <Label fx:id="selectedExistingCustomerLabel"
+                                               text="Клиент не выбран"
+                                               styleClass="muted-label"/>
+                                        <Button fx:id="clearExistingCustomerButton"
+                                                text="Сбросить выбор"
+                                                styleClass="button-warning"/>
                                     </VBox>
                                 </VBox>
 
-                                <Label text="Тип операции:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Тип операции:" styleClass="section-title"/>
 
                                 <HBox spacing="20" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
                                     <VBox spacing="5">
@@ -140,7 +152,7 @@
                                 </HBox>
 
                                 <Label text="Способ оплаты:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"
+                                       styleClass="section-title"
                                        visible="false"
                                        managed="false"
                                        fx:id="paymentMethodLabel"/>
@@ -153,17 +165,17 @@
                                 <HBox spacing="10" alignment="CENTER">
                                     <Button fx:id="sellTicketButton"
                                             text="ПРОДАТЬ БИЛЕТЫ"
-                                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"
+                                            styleClass="button-success"
                                             prefWidth="160" prefHeight="40"/>
 
                                     <Button fx:id="bookTicketButton"
                                             text="ЗАБРОНИРОВАТЬ"
-                                            style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"
+                                            styleClass="button-warning"
                                             prefWidth="160" prefHeight="40"/>
                                 </HBox>
 
                                 <VBox spacing="5" style="-fx-padding: 10; -fx-background-color: #e8f5e9; -fx-border-radius: 5;">
-                                    <Label text="ПОДСКАЗКА:" style="-fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                                    <Label text="ПОДСКАЗКА:" styleClass="section-title" />
                                     <Label text="1. Выберите дату → 2. Выберите фильм и время → 3. Выберите места → 4. Заполните данные клиента"
                                            style="-fx-text-fill: #2c3e50; -fx-font-size: 12px;" wrapText="true"/>
                                 </VBox>
@@ -201,11 +213,11 @@
                     <HBox spacing="10">
                         <Button fx:id="confirmBookingButton"
                                 text="Подтвердить бронирование"
-                                style="-fx-background-color: #2ecc71; -fx-text-fill: white;"
+                                styleClass="button-success"
                                 prefWidth="200"/>
                         <Button fx:id="cancelBookingButton"
                                 text="Отменить бронирование"
-                                style="-fx-background-color: #e74c3c; -fx-text-fill: white;"
+                                styleClass="button-danger"
                                 prefWidth="200"/>
                     </HBox>
                 </VBox>
@@ -217,6 +229,36 @@
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
+
+                    <VBox spacing="10" styleClass="card">
+                        <Label text="Регистрация клиента" styleClass="section-title"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="ФИО:" prefWidth="80"/>
+                            <TextField fx:id="registerNameField"
+                                       promptText="Введите ФИО"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Телефон:" prefWidth="80"/>
+                            <TextField fx:id="registerPhoneField"
+                                       promptText="+7XXXXXXXXXX"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Email:" prefWidth="80"/>
+                            <TextField fx:id="registerEmailField"
+                                       promptText="email@example.com"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <Button fx:id="registerCustomerButton"
+                                text="Зарегистрировать"
+                                styleClass="button-success"
+                                prefWidth="160"/>
+                    </VBox>
 
                     <HBox spacing="10">
                         <TextField fx:id="customerSearchField"
@@ -244,9 +286,8 @@
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
 
-                    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
-                        <Label text="Оформление возврата"
-                               style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    <VBox spacing="10" styleClass="card">
+                        <Label text="Оформление возврата" styleClass="section-title"/>
 
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Номер билета:" prefWidth="100"/>
@@ -264,7 +305,7 @@
 
                         <Button fx:id="refundButton"
                                 text="Оформить возврат"
-                                style="-fx-background-color: #e74c3c; -fx-text-fill: white;"
+                                styleClass="button-danger"
                                 prefWidth="150"/>
                     </VBox>
 
