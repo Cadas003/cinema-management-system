@@ -58,7 +58,7 @@ public class CashierDashboardController {
     @FXML
     public void handleLoadOccupiedSeats() {
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
             List<Integer> occupied = ticketService.occupiedSeats(showtimeId);
             occupiedSeatsArea.setText(occupied.toString());
         } catch (Exception ex) {
@@ -69,13 +69,13 @@ public class CashierDashboardController {
     @FXML
     public void handleReserveTicket() {
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
-            int seatId = Integer.parseInt(seatIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
+            int seatId = parseRequiredInt(seatIdField.getText(), "ID места");
             Integer customerId = parseNullableInt(customerIdField.getText());
-            int userId = Integer.parseInt(userIdField.getText());
+            int userId = parseRequiredInt(userIdField.getText(), "ID кассира");
             ticketService.reserveTickets(showtimeId, List.of(seatId), customerId, userId);
             showInfo("Бронь создана");
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка брони: " + ex.getMessage());
         }
     }
@@ -83,14 +83,14 @@ public class CashierDashboardController {
     @FXML
     public void handleDirectPurchase() {
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
-            int seatId = Integer.parseInt(seatIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
+            int seatId = parseRequiredInt(seatIdField.getText(), "ID места");
             Integer customerId = parseNullableInt(customerIdField.getText());
-            int userId = Integer.parseInt(userIdField.getText());
-            int methodId = Integer.parseInt(paymentMethodField.getText());
+            int userId = parseRequiredInt(userIdField.getText(), "ID кассира");
+            int methodId = parseRequiredInt(paymentMethodField.getText(), "Метод оплаты");
             ticketService.directPurchase(showtimeId, seatId, customerId, userId, methodId);
             showInfo("Оплата прошла успешно");
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка оплаты: " + ex.getMessage());
         }
     }
@@ -101,7 +101,7 @@ public class CashierDashboardController {
         selectedSeatsArea.clear();
         seatMapGrid.getChildren().clear();
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
             Showtime showtime = showtimeDao.findById(showtimeId).orElse(null);
             if (showtime == null) {
                 showAlert("Сеанс не найден");
@@ -137,9 +137,9 @@ public class CashierDashboardController {
     @FXML
     public void handleReserveSelectedSeats() {
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
             Integer customerId = parseNullableInt(customerIdField.getText());
-            int userId = Integer.parseInt(userIdField.getText());
+            int userId = parseRequiredInt(userIdField.getText(), "ID кассира");
             if (selectedSeatIds.isEmpty()) {
                 showAlert("Выберите места для брони");
                 return;
@@ -147,7 +147,7 @@ public class CashierDashboardController {
             ticketService.reserveTickets(showtimeId, List.copyOf(selectedSeatIds), customerId, userId);
             showInfo("Бронь создана");
             handleBuildSeatMap();
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка брони: " + ex.getMessage());
         }
     }
@@ -155,10 +155,10 @@ public class CashierDashboardController {
     @FXML
     public void handlePurchaseSelectedSeats() {
         try {
-            int showtimeId = Integer.parseInt(showtimeIdField.getText());
+            int showtimeId = parseRequiredInt(showtimeIdField.getText(), "ID сеанса");
             Integer customerId = parseNullableInt(customerIdField.getText());
-            int userId = Integer.parseInt(userIdField.getText());
-            int methodId = Integer.parseInt(paymentMethodField.getText());
+            int userId = parseRequiredInt(userIdField.getText(), "ID кассира");
+            int methodId = parseRequiredInt(paymentMethodField.getText(), "Метод оплаты");
             if (selectedSeatIds.isEmpty()) {
                 showAlert("Выберите места для покупки");
                 return;
@@ -168,7 +168,7 @@ public class CashierDashboardController {
             }
             showInfo("Покупка завершена");
             handleBuildSeatMap();
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка оплаты: " + ex.getMessage());
         }
     }
@@ -176,12 +176,12 @@ public class CashierDashboardController {
     @FXML
     public void handleConfirmReservation() {
         try {
-            long ticketId = Long.parseLong(ticketIdField.getText());
-            int userId = Integer.parseInt(userIdField.getText());
-            int methodId = Integer.parseInt(paymentMethodField.getText());
+            long ticketId = parseRequiredLong(ticketIdField.getText(), "ID билета");
+            int userId = parseRequiredInt(userIdField.getText(), "ID кассира");
+            int methodId = parseRequiredInt(paymentMethodField.getText(), "Метод оплаты");
             ticketService.confirmReservation(ticketId, userId, methodId);
             showInfo("Бронь оплачена");
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка оплаты брони: " + ex.getMessage());
         }
     }
@@ -189,10 +189,10 @@ public class CashierDashboardController {
     @FXML
     public void handleRefund() {
         try {
-            long ticketId = Long.parseLong(ticketIdField.getText());
+            long ticketId = parseRequiredLong(ticketIdField.getText(), "ID билета");
             ticketService.refundTicket(ticketId);
             showInfo("Возврат выполнен");
-        } catch (SQLException ex) {
+        } catch (SQLException | IllegalArgumentException ex) {
             showAlert("Ошибка возврата: " + ex.getMessage());
         }
     }
@@ -202,6 +202,28 @@ public class CashierDashboardController {
             return null;
         }
         return Integer.parseInt(value);
+    }
+
+    private int parseRequiredInt(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " не заполнен");
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(fieldName + " имеет неверный формат");
+        }
+    }
+
+    private long parseRequiredLong(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " не заполнен");
+        }
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(fieldName + " имеет неверный формат");
+        }
     }
 
     private void toggleSeatSelection(int seatId, Button seatButton) {

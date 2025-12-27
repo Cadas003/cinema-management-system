@@ -13,7 +13,8 @@ public class SeatDao {
     private final DataSource dataSource = DataSourceProvider.getDataSource();
 
     public List<Seat> findByHall(int hallId) throws SQLException {
-        String sql = "SELECT seat_id, hall_id, seat_row, seat_number, category_id FROM seat WHERE hall_id = ?";
+        String sql = "SELECT seat_id, hall_id, seat_row, seat_number, category_id FROM seat "
+                + "WHERE hall_id = ? ORDER BY seat_row, seat_number";
         List<Seat> result = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
