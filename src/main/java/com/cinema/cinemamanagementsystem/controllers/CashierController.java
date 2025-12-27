@@ -313,6 +313,8 @@ public class CashierController implements Initializable {
             // Информация о зале и свободных местах
             Label hallLabel = new Label("Зал " + showtime.getHallName());
             hallLabel.getStyleClass().add("showtime-hall");
+            hallLabel.setWrapText(true);
+            hallLabel.setMaxWidth(120);
 
             int totalSeats = showtimeDAO.getSeatsForShowtime(showtime.getShowtimeId()).size();
             int takenSeats = showtimeDAO.getTakenSeats(showtime.getShowtimeId()).size();
@@ -322,6 +324,8 @@ public class CashierController implements Initializable {
             String seatsClass = freeSeats == 0 ? "showtime-seats-busy" :
                     freeSeats < 10 ? "showtime-seats-warning" : "showtime-seats-ok";
             seatsLabel.getStyleClass().add(seatsClass);
+            seatsLabel.setWrapText(true);
+            seatsLabel.setMaxWidth(140);
 
             timeRow.getChildren().addAll(timeBtn, hallLabel, seatsLabel);
             timesBox.getChildren().add(timeRow);

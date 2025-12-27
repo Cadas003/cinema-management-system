@@ -495,6 +495,7 @@
     -fx-border-radius: 18;
     -fx-border-width: 1;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 18, 0.2, 0, 4);
+    -fx-padding: 14 16;
 }
 
 .showtime-title {
@@ -509,34 +510,47 @@
     -fx-background-radius: 10;
     -fx-font-weight: bold;
     -fx-padding: 3 8;
+    -fx-min-width: 54;
 }
 
 .showtime-hall {
     -fx-text-fill: #6b7694;
     -fx-font-size: 10px;
+    -fx-wrap-text: true;
+    -fx-text-overrun: ellipsis;
 }
 
 .showtime-seats-ok {
     -fx-text-fill: #2fa36a;
     -fx-font-weight: bold;
     -fx-font-size: 10px;
+    -fx-wrap-text: true;
+    -fx-text-overrun: ellipsis;
 }
 
 .showtime-seats-warning {
     -fx-text-fill: #f0a33c;
     -fx-font-weight: bold;
     -fx-font-size: 10px;
+    -fx-wrap-text: true;
+    -fx-text-overrun: ellipsis;
 }
 
 .showtime-seats-busy {
     -fx-text-fill: #e2554f;
     -fx-font-weight: bold;
     -fx-font-size: 10px;
+    -fx-wrap-text: true;
+    -fx-text-overrun: ellipsis;
 }
 
 .showtime-empty {
     -fx-text-fill: #a0a7bd;
     -fx-font-size: 12px;
+}
+
+.film-grid {
+    -fx-padding: 12;
 }
 
 .showtime-open {
