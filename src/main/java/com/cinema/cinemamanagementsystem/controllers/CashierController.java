@@ -274,9 +274,9 @@ public class CashierController implements Initializable {
     }
 
     private VBox createFilmCard(Film film, LocalDate date, List<Showtime> filmShowtimesParam) {
-        VBox card = new VBox(12);
-        card.setPadding(new Insets(16));
-        card.setPrefWidth(240);
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(12));
+        card.setPrefWidth(220);
         card.getStyleClass().add("showtime-card");
         card.setUserData(film);
 
@@ -284,7 +284,7 @@ public class CashierController implements Initializable {
         Label titleLabel = new Label(film.getTitle());
         titleLabel.getStyleClass().add("showtime-title");
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(220);
+        titleLabel.setMaxWidth(200);
 
         // Создаем effectively final копию списка
         final List<Showtime> showtimesList;
@@ -297,7 +297,7 @@ public class CashierController implements Initializable {
             showtimesList.sort(Comparator.comparing(Showtime::getDateTime));
         }
 
-        VBox timesBox = new VBox(6);
+        VBox timesBox = new VBox(4);
 
         for (Showtime showtime : showtimesList) {
             HBox timeRow = new HBox(8);

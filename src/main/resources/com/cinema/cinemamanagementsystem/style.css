@@ -448,6 +448,10 @@
     -fx-background-radius: 10;
 }
 
+.compact-section {
+    -fx-padding: 10;
+}
+
 .hero-card {
     -fx-background-color: linear-gradient(to right, #ffffff, #f2f4ff);
     -fx-background-radius: 18;
@@ -495,7 +499,7 @@
 
 .showtime-title {
     -fx-text-fill: #29334f;
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
@@ -504,30 +508,30 @@
     -fx-text-fill: white;
     -fx-background-radius: 10;
     -fx-font-weight: bold;
-    -fx-padding: 4 10;
+    -fx-padding: 3 8;
 }
 
 .showtime-hall {
     -fx-text-fill: #6b7694;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 
 .showtime-seats-ok {
     -fx-text-fill: #2fa36a;
     -fx-font-weight: bold;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 
 .showtime-seats-warning {
     -fx-text-fill: #f0a33c;
     -fx-font-weight: bold;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 
 .showtime-seats-busy {
     -fx-text-fill: #e2554f;
     -fx-font-weight: bold;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 
 .showtime-empty {

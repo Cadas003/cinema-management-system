@@ -7,7 +7,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
-            prefHeight="700.0" prefWidth="1000.0"
+            prefHeight="620.0" prefWidth="920.0"
             styleClass="app-root">
 
     <top>

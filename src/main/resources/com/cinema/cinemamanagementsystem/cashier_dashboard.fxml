@@ -41,7 +41,7 @@
             <tabs>
                 <Tab text="Продажа билетов">
                     <ScrollPane fitToWidth="true" styleClass="content-scroll">
-                        <VBox spacing="10" styleClass="content-wrapper">
+                            <VBox spacing="8" styleClass="content-wrapper compact-section">
                             <VBox spacing="8" styleClass="hero-card">
                                 <HBox spacing="12" alignment="CENTER_LEFT">
                                     <Label text="📅" styleClass="hero-icon"/>
@@ -55,14 +55,14 @@
                                 <Label text="Выберите сеанс для продажи" styleClass="hero-hint"/>
                             </VBox>
 
-                            <VBox spacing="8">
+                            <VBox spacing="6">
                                 <Label text="Сеансы на выбранную дату" styleClass="section-title"/>
                                 <VBox spacing="6" styleClass="card compact-card">
-                                    <ScrollPane prefHeight="420" styleClass="content-scroll">
+                                    <ScrollPane prefHeight="340" styleClass="content-scroll">
                                         <TilePane fx:id="filmsTilePane"
-                                                  hgap="16" vgap="16"
-                                                  prefTileWidth="260"
-                                                  prefTileHeight="170"
+                                                  hgap="12" vgap="12"
+                                                  prefTileWidth="220"
+                                                  prefTileHeight="140"
                                                   styleClass="film-tiles film-grid"/>
                                     </ScrollPane>
                                 </VBox>
