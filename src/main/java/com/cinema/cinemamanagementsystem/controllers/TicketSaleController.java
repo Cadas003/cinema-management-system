@@ -42,6 +42,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDateTime;
