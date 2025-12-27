@@ -19,8 +19,7 @@ public class BookingService {
 
     // Продажа билета (без бронирования)
     public Ticket sellTicket(int showtimeId, int seatId, int userId,
-                             Integer customerId, boolean registerCustomer,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Integer customerId) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -29,9 +28,8 @@ public class BookingService {
             }
 
 
-            // 2. Находим или создаем клиента (если клиент выбран или регистрируется)
-            Customer customer = resolveCustomer(customerId, registerCustomer,
-                    customerName, customerPhone, customerEmail);
+            // 2. Находим клиента (если выбран)
+            Customer customer = resolveCustomer(customerId);
 
             // 3. Создаем билет со статусом "оплачен"
             Ticket ticket = new Ticket();
@@ -73,8 +71,7 @@ public class BookingService {
 
     // Бронирование билета
     public Ticket bookTicket(int showtimeId, int seatId, int userId,
-                             Integer customerId, boolean registerCustomer,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Integer customerId) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -83,9 +80,8 @@ public class BookingService {
             }
 
 
-            // 2. Находим или создаем клиента (если клиент выбран или регистрируется)
-            Customer customer = resolveCustomer(customerId, registerCustomer,
-                    customerName, customerPhone, customerEmail);
+            // 2. Находим клиента (если выбран)
+            Customer customer = resolveCustomer(customerId);
 
             // 3. Создаем билет со статусом "забронирован"
             Ticket ticket = new Ticket();
@@ -228,29 +224,15 @@ public class BookingService {
         return finalPrice;
     }
 
-    private Customer resolveCustomer(Integer customerId, boolean registerCustomer,
-                                     String customerName, String customerPhone, String customerEmail) {
-        if (customerId != null) {
-            Customer customer = customerDAO.getCustomerById(customerId);
-            if (customer == null) {
-                throw new IllegalStateException("Выбранный клиент не найден");
-            }
-            return customer;
+    private Customer resolveCustomer(Integer customerId) {
+        if (customerId == null) {
+            return null;
         }
-
-        if (registerCustomer) {
-            if (customerName == null || customerName.trim().isEmpty()
-                    || customerPhone == null || customerPhone.trim().isEmpty()) {
-                throw new IllegalStateException("Для регистрации нужны имя и телефон");
-            }
-            Customer customer = customerDAO.findOrCreateCustomer(customerName, customerPhone, customerEmail);
-            if (customer == null) {
-                throw new IllegalStateException("Не удалось создать клиента");
-            }
-            return customer;
+        Customer customer = customerDAO.getCustomerById(customerId);
+        if (customer == null) {
+            throw new IllegalStateException("Выбранный клиент не найден");
         }
-
-        return null;
+        return customer;
     }
 
     // Автоматическая отмена истекших бронирований

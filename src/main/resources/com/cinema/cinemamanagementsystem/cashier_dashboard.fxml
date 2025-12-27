@@ -103,38 +103,30 @@
                                     <Label text="Тип клиента:" style="-fx-font-weight: bold;"/>
                                     <VBox spacing="6">
                                         <RadioButton fx:id="guestCustomerRadio" text="Гость"/>
-                                        <RadioButton fx:id="existingCustomerRadio" text="Выбрать существующего"/>
-                                        <RadioButton fx:id="registerCustomerRadio" text="Регистрация нового клиента"/>
+                                        <RadioButton fx:id="existingCustomerRadio" text="Существующий клиент"/>
                                     </VBox>
 
-                                    <VBox fx:id="existingCustomerBox" spacing="8">
-                                        <Label text="Существующий клиент:" style="-fx-font-weight: bold;"/>
-                                        <ComboBox fx:id="existingCustomerCombo"
-                                                  promptText="Выберите клиента"
-                                                  prefWidth="320"/>
-                                    </VBox>
+                                    <VBox fx:id="existingCustomerBox" spacing="10">
+                                        <Label text="Поиск клиента:" style="-fx-font-weight: bold;"/>
+                                        <HBox spacing="8">
+                                            <TextField fx:id="existingCustomerSearchField"
+                                                       promptText="Имя, телефон или email"
+                                                       prefWidth="220"/>
+                                            <Button fx:id="existingCustomerSearchButton"
+                                                    text="Найти"/>
+                                        </HBox>
 
-                                    <VBox fx:id="registerCustomerBox" spacing="10">
-                                        <VBox spacing="8">
-                                            <Label text="ФИО клиента:" style="-fx-font-weight: bold;"/>
-                                            <TextField fx:id="customerNameField"
-                                                       promptText="Введите ФИО"
-                                                       prefWidth="320"/>
-                                        </VBox>
+                                        <TableView fx:id="existingCustomersTable" prefHeight="160">
+                                            <columns>
+                                                <TableColumn fx:id="existingCustomerNameColumn" text="ФИО" prefWidth="140"/>
+                                                <TableColumn fx:id="existingCustomerPhoneColumn" text="Телефон" prefWidth="120"/>
+                                            </columns>
+                                        </TableView>
 
-                                        <VBox spacing="8">
-                                            <Label text="Телефон:" style="-fx-font-weight: bold;"/>
-                                            <TextField fx:id="customerPhoneField"
-                                                       promptText="+7XXXXXXXXXX"
-                                                       prefWidth="320"/>
-                                        </VBox>
-
-                                        <VBox spacing="8">
-                                            <Label text="Email (необязательно):" style="-fx-font-weight: bold;"/>
-                                            <TextField fx:id="customerEmailField"
-                                                       promptText="email@example.com"
-                                                       prefWidth="320"/>
-                                        </VBox>
+                                        <Label fx:id="selectedExistingCustomerLabel"
+                                               text="Клиент не выбран"
+                                               style="-fx-text-fill: #7f8c8d;"/>
+                                        <Button fx:id="clearExistingCustomerButton" text="Сбросить выбор"/>
                                     </VBox>
                                 </VBox>
 
@@ -233,6 +225,36 @@
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
+
+                    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
+                        <Label text="Регистрация клиента"
+                               style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="ФИО:" prefWidth="80"/>
+                            <TextField fx:id="registerNameField"
+                                       promptText="Введите ФИО"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Телефон:" prefWidth="80"/>
+                            <TextField fx:id="registerPhoneField"
+                                       promptText="+7XXXXXXXXXX"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Email:" prefWidth="80"/>
+                            <TextField fx:id="registerEmailField"
+                                       promptText="email@example.com"
+                                       prefWidth="240"/>
+                        </HBox>
+
+                        <Button fx:id="registerCustomerButton"
+                                text="Зарегистрировать"
+                                prefWidth="160"/>
+                    </VBox>
 
                     <HBox spacing="10">
                         <TextField fx:id="customerSearchField"
