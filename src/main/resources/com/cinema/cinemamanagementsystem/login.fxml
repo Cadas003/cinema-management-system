@@ -6,12 +6,11 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.LoginController"
-            prefHeight="600.0" prefWidth="900.0"
+            prefHeight="420.0" prefWidth="520.0"
             styleClass="login-pane">
 
     <VBox alignment="CENTER" spacing="20.0"
@@ -21,47 +20,27 @@
           AnchorPane.topAnchor="0.0">
 
         <Label text="Кинотеатр 'КиноСфера'"
-               styleClass="login-title">
-            <font>
-                <Font name="System Bold" size="32.0" />
-            </font>
-        </Label>
+               styleClass="login-title"/>
 
         <Label text="Система управления"
-               styleClass="login-subtitle">
-            <font>
-                <Font name="System" size="18.0" />
-            </font>
-        </Label>
+               styleClass="login-subtitle"/>
 
         <VBox alignment="CENTER" spacing="15.0"
               prefWidth="350.0"
               styleClass="login-form">
 
             <Label text="Авторизация"
-                   styleClass="form-title">
-                <font>
-                    <Font name="System Bold" size="24.0" />
-                </font>
-            </Label>
+                   styleClass="form-title"/>
 
             <TextField fx:id="loginField"
                        promptText="Логин"
                        styleClass="login-field"
-                       onKeyTyped="#clearError">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            </TextField>
+                       onKeyTyped="#clearError"/>
 
             <PasswordField fx:id="passwordField"
                            promptText="Пароль"
                            styleClass="login-field"
-                           onKeyTyped="#clearError">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            </PasswordField>
+                           onKeyTyped="#clearError"/>
 
             <Label fx:id="errorLabel"
                    styleClass="error-label"
@@ -70,27 +49,15 @@
             <Button fx:id="loginButton"
                     text="Войти"
                     styleClass="login-button"
-                    defaultButton="true">
-                <font>
-                    <Font name="System Bold" size="14.0" />
-                </font>
-            </Button>
+                    defaultButton="true"/>
 
             <Label text="Используйте корпоративную учетную запись"
-                   styleClass="help-text">
-                <font>
-                    <Font name="System" size="12.0" />
-                </font>
-            </Label>
+                   styleClass="help-text"/>
 
         </VBox>
 
         <Label text="© 2025 Кинотеатр 'КиноСфера'. Все права защищены."
-               styleClass="footer-label">
-            <font>
-                <Font name="System" size="10.0" />
-            </font>
-        </Label>
+               styleClass="footer-label"/>
 
     </VBox>
 

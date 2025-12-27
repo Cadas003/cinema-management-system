@@ -3,6 +3,7 @@
    =========================== */
 .root, .app-root {
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
+    -fx-font-size: 13px;
     -fx-background-color: linear-gradient(to bottom, #f8f9fc, #eef2f8);
     -fx-text-fill: #1f2a44;
 
@@ -79,7 +80,7 @@
 }
 
 .content-wrapper {
-    -fx-padding: 16;
+    -fx-padding: 20;
 }
 
 .content-scroll {
@@ -102,7 +103,7 @@
 .section-title {
     -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
-    -fx-font-size: 12px;
+    -fx-font-size: 13px;
 }
 
 .input-label {
@@ -141,7 +142,7 @@
 
 .help-text {
     -fx-text-fill: #7f8c8d;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 
 .film-tiles {
@@ -190,7 +191,7 @@
 .card {
     -fx-background-color: white;
     -fx-background-radius: 16;
-    -fx-padding: 12;
+    -fx-padding: 14;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0.25, 0, 4);
 }
 
@@ -204,19 +205,30 @@
 .login-form {
     -fx-background-color: white;
     -fx-background-radius: 16;
-    -fx-padding: 30;
+    -fx-padding: 26 28;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 24, 0.3, 0, 4);
+}
+
+.form-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+
+.footer-label {
+    -fx-text-fill: rgba(255,255,255,0.7);
+    -fx-font-size: 11px;
 }
 
 .login-title {
     -fx-text-fill: white;
-    -fx-font-size: 24px;
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
 }
 
 .login-subtitle {
     -fx-text-fill: rgba(255,255,255,0.75);
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
 }
 
 .login-field {
@@ -238,7 +250,7 @@
     -fx-background-radius: 10;
     -fx-background-color: #3f6ae0;
     -fx-text-fill: white;
-    -fx-font-size: 15px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
@@ -320,10 +332,12 @@
 .table-view .column-header .label {
     -fx-text-fill: #1f2a44;
     -fx-font-weight: bold;
+    -fx-padding: 6 8;
 }
 
 .table-row-cell {
     -fx-border-color: #eef1f4;
+    -fx-cell-size: 34px;
 }
 
 .table-row-cell:selected {
