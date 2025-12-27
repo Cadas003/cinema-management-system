@@ -459,6 +459,23 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0.25, 0, 4);
 }
 
+.ticket-compact .card,
+.ticket-compact .sidebar-card {
+    -fx-padding: 10;
+}
+
+.ticket-compact .seat-card {
+    -fx-padding: 12;
+}
+
+.ticket-compact .section-title {
+    -fx-font-size: 11px;
+}
+
+.ticket-compact .help-text {
+    -fx-font-size: 9px;
+}
+
 .hero-title {
     -fx-text-fill: #2f3a58;
     -fx-font-weight: bold;

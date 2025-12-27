@@ -7,11 +7,11 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
-            prefHeight="620.0" prefWidth="920.0"
-            styleClass="app-root">
+            prefHeight="560.0" prefWidth="880.0"
+            styleClass="app-root ticket-compact">
 
     <top>
-        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar compact-toolbar">
             <Label text="Продажа и бронирование" styleClass="section-title"/>
             <Pane HBox.hgrow="ALWAYS"/>
             <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб." styleClass="stat-chip"/>
@@ -21,21 +21,26 @@
     <center>
         <GridPane styleClass="compact-grid compact-grid-tight">
             <padding>
-                <Insets top="12" right="12" bottom="12" left="12"/>
+                <Insets top="10" right="12" bottom="12" left="12"/>
             </padding>
             <columnConstraints>
-                <ColumnConstraints percentWidth="65"/>
-                <ColumnConstraints percentWidth="35"/>
+                <ColumnConstraints percentWidth="68"/>
+                <ColumnConstraints percentWidth="32"/>
             </columnConstraints>
 
-            <VBox spacing="10" GridPane.columnIndex="0">
+            <VBox spacing="8" GridPane.columnIndex="0">
                 <Label text="Сеанс" styleClass="section-title"/>
-                <VBox spacing="6" styleClass="card compact-card">
-                    <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
-                    <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
-                    <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
-                    <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
-                </VBox>
+                <HBox spacing="10">
+                    <VBox spacing="4" styleClass="card compact-card" prefWidth="280">
+                        <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
+                        <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
+                        <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
+                    </VBox>
+                    <VBox spacing="4" styleClass="card compact-card" prefWidth="260">
+                        <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
+                        <Label text="Состояние мест обновляется автоматически" styleClass="help-text"/>
+                    </VBox>
+                </HBox>
 
                 <Label text="Выбор места" styleClass="section-title"/>
                 <VBox spacing="6" styleClass="seat-card compact-card">
@@ -44,7 +49,7 @@
                 </VBox>
             </VBox>
 
-            <VBox spacing="10" GridPane.columnIndex="1">
+            <VBox spacing="8" GridPane.columnIndex="1">
                 <VBox spacing="6" styleClass="sidebar-card compact-card">
                     <Label text="Клиент" styleClass="section-title"/>
                     <VBox spacing="6">
@@ -58,12 +63,12 @@
 
                 <VBox spacing="6" styleClass="sidebar-card compact-card">
                     <Label text="Действия" styleClass="section-title"/>
-                    <HBox spacing="8">
+                    <VBox spacing="8">
                         <Button fx:id="sellTicketButton" text="ПРОДАТЬ"
-                                styleClass="button-success" prefWidth="120" prefHeight="32"/>
+                                styleClass="button-success" prefWidth="210" prefHeight="34"/>
                         <Button fx:id="bookTicketButton" text="ЗАБРОНИРОВАТЬ"
-                                styleClass="button-warning" prefWidth="150" prefHeight="32"/>
-                    </HBox>
+                                styleClass="button-warning" prefWidth="210" prefHeight="34"/>
+                    </VBox>
                     <VBox spacing="4" styleClass="hint-card compact-card">
                         <Label text="Подсказка" styleClass="hint-title"/>
                         <Label text="1. Выберите места → 2. Клиент → 3. Продажа или бронь"
