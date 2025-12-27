@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
+            prefHeight="700.0" prefWidth="1000.0"
+            styleClass="app-root">
+
+    <top>
+        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+            <Label text="Продажа и бронирование" styleClass="section-title"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб." styleClass="stat-chip"/>
+        </HBox>
+    </top>
+
+    <center>
+        <GridPane styleClass="compact-grid compact-grid-tight">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="65"/>
+                <ColumnConstraints percentWidth="35"/>
+            </columnConstraints>
+
+            <VBox spacing="10" GridPane.columnIndex="0">
+                <Label text="Сеанс" styleClass="section-title"/>
+                <VBox spacing="6" styleClass="card compact-card">
+                    <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
+                    <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
+                    <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
+                    <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
+                </VBox>
+
+                <Label text="Выбор места" styleClass="section-title"/>
+                <VBox spacing="6" styleClass="seat-card compact-card">
+                    <Label text="Экран" styleClass="screen" alignment="CENTER"/>
+                    <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
+                </VBox>
+            </VBox>
+
+            <VBox spacing="10" GridPane.columnIndex="1">
+                <VBox spacing="6" styleClass="sidebar-card compact-card">
+                    <Label text="Клиент" styleClass="section-title"/>
+                    <VBox spacing="6">
+                        <RadioButton fx:id="guestCustomerRadio" text="Гость" selected="true"/>
+                        <RadioButton fx:id="registeredCustomerRadio" text="Зарегистрированный клиент"/>
+                    </VBox>
+                    <TextField fx:id="registeredSearchField" promptText="Быстрый поиск клиента"/>
+                    <ComboBox fx:id="registeredCustomerCombo" promptText="Выберите клиента" maxWidth="Infinity"/>
+                    <Label text="Регистрация клиента — во вкладке «Клиенты»" styleClass="help-text"/>
+                </VBox>
+
+                <VBox spacing="6" styleClass="sidebar-card compact-card">
+                    <Label text="Действия" styleClass="section-title"/>
+                    <HBox spacing="8">
+                        <Button fx:id="sellTicketButton" text="ПРОДАТЬ"
+                                styleClass="button-success" prefWidth="120" prefHeight="32"/>
+                        <Button fx:id="bookTicketButton" text="ЗАБРОНИРОВАТЬ"
+                                styleClass="button-warning" prefWidth="150" prefHeight="32"/>
+                    </HBox>
+                    <VBox spacing="4" styleClass="hint-card compact-card">
+                        <Label text="Подсказка" styleClass="hint-title"/>
+                        <Label text="1. Выберите места → 2. Клиент → 3. Продажа или бронь"
+                               styleClass="help-text" wrapText="true"/>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </GridPane>
+    </center>
+
+</BorderPane>

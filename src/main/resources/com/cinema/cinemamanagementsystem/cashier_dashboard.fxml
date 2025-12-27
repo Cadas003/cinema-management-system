@@ -59,75 +59,19 @@
                                        styleClass="stat-chip"/>
                             </HBox>
 
-                            <GridPane styleClass="compact-grid compact-grid-tight">
-                                <columnConstraints>
-                                    <ColumnConstraints percentWidth="66"/>
-                                    <ColumnConstraints percentWidth="34"/>
-                                </columnConstraints>
-
-                                <VBox spacing="8" GridPane.columnIndex="0">
-                                    <Label text="Фильмы и сеансы" styleClass="section-title"/>
-                                    <VBox spacing="6" styleClass="card compact-card">
-                                        <ScrollPane prefHeight="190" styleClass="content-scroll">
-                                            <TilePane fx:id="filmsTilePane"
-                                                      hgap="10" vgap="10"
-                                                      prefTileWidth="210"
-                                                      prefTileHeight="120"
-                                                      styleClass="film-tiles"/>
-                                        </ScrollPane>
-                                    </VBox>
-
-                                    <Label text="Сеанс" styleClass="section-title"/>
-                                    <GridPane hgap="10" vgap="10">
-                                        <columnConstraints>
-                                            <ColumnConstraints percentWidth="40"/>
-                                            <ColumnConstraints percentWidth="60"/>
-                                        </columnConstraints>
-                                        <VBox spacing="6" styleClass="card compact-card" GridPane.columnIndex="0">
-                                            <Label fx:id="selectedFilmLabel" text="Фильм:" styleClass="info-label"/>
-                                            <Label fx:id="selectedDateTimeLabel" text="Время:" styleClass="info-label"/>
-                                            <Label fx:id="selectedHallLabel" text="Зал:" styleClass="info-label"/>
-                                            <Label fx:id="selectedPriceLabel" text="Цена:" styleClass="info-label-accent"/>
-                                        </VBox>
-                                        <VBox spacing="6" styleClass="seat-card compact-card" GridPane.columnIndex="1">
-                                            <Label text="Экран" styleClass="screen" alignment="CENTER"/>
-                                            <GridPane fx:id="seatGrid" hgap="5" vgap="5" styleClass="seat-grid"/>
-                                        </VBox>
-                                    </GridPane>
+                            <VBox spacing="8">
+                                <Label text="Сеансы на выбранную дату" styleClass="section-title"/>
+                                <VBox spacing="6" styleClass="card compact-card">
+                                    <ScrollPane prefHeight="420" styleClass="content-scroll">
+                                        <TilePane fx:id="filmsTilePane"
+                                                  hgap="12" vgap="12"
+                                                  prefTileWidth="240"
+                                                  prefTileHeight="140"
+                                                  styleClass="film-tiles"/>
+                                    </ScrollPane>
                                 </VBox>
-
-                                <VBox spacing="8" GridPane.columnIndex="1">
-                                    <VBox spacing="6" styleClass="sidebar-card compact-card">
-                                        <Label text="Клиент" styleClass="section-title"/>
-                                        <VBox spacing="6">
-                                            <RadioButton fx:id="guestCustomerRadio" text="Гость" selected="true"/>
-                                            <RadioButton fx:id="registeredCustomerRadio" text="Зарегистрированный клиент"/>
-                                        </VBox>
-                                        <TextField fx:id="registeredSearchField" promptText="Быстрый поиск клиента"/>
-                                        <ComboBox fx:id="registeredCustomerCombo" promptText="Выберите клиента" maxWidth="Infinity"/>
-                                        <Label text="Регистрация клиента — во вкладке «Клиенты»" styleClass="help-text"/>
-                                    </VBox>
-
-                                    <VBox spacing="6" styleClass="sidebar-card compact-card">
-                                        <Label text="Действия" styleClass="section-title"/>
-                                        <Label fx:id="paymentMethodLabel" text="Способ оплаты" styleClass="section-title"
-                                               visible="false" managed="false"/>
-                                        <ComboBox fx:id="paymentMethodCombo" prefWidth="200"
-                                                  visible="false" managed="false"/>
-                                        <HBox spacing="8">
-                                            <Button fx:id="sellTicketButton" text="ПРОДАТЬ"
-                                                    styleClass="button-success" prefWidth="120" prefHeight="32"/>
-                                            <Button fx:id="bookTicketButton" text="ЗАБРОНИРОВАТЬ"
-                                                    styleClass="button-warning" prefWidth="150" prefHeight="32"/>
-                                        </HBox>
-                                        <VBox spacing="4" styleClass="hint-card compact-card">
-                                            <Label text="Подсказка" styleClass="hint-title"/>
-                                            <Label text="1. Дата → 2. Фильм и время → 3. Места → 4. Клиент"
-                                                   styleClass="help-text" wrapText="true"/>
-                                        </VBox>
-                                    </VBox>
-                                </VBox>
-                            </GridPane>
+                                <Label text="Нажмите на время сеанса, чтобы открыть продажу" styleClass="help-text"/>
+                            </VBox>
                         </VBox>
                     </ScrollPane>
                 </Tab>
