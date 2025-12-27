@@ -114,6 +114,8 @@
                                                        prefWidth="220"/>
                                             <Button fx:id="existingCustomerSearchButton"
                                                     text="Найти"/>
+                                            <Button fx:id="existingCustomerClearSearchButton"
+                                                    text="Сбросить"/>
                                         </HBox>
 
                                         <TableView fx:id="existingCustomersTable" prefHeight="160">

@@ -61,6 +61,7 @@ public class CashierController implements Initializable {
     @FXML private RadioButton existingCustomerRadio;
     @FXML private TextField existingCustomerSearchField;
     @FXML private Button existingCustomerSearchButton;
+    @FXML private Button existingCustomerClearSearchButton;
     @FXML private TableView<Customer> existingCustomersTable;
     @FXML private TableColumn<Customer, String> existingCustomerNameColumn;
     @FXML private TableColumn<Customer, String> existingCustomerPhoneColumn;
@@ -193,6 +194,8 @@ public class CashierController implements Initializable {
         });
         existingCustomerSearchButton.setOnAction(e -> searchExistingCustomers());
         existingCustomerSearchField.setOnAction(e -> searchExistingCustomers());
+        existingCustomerSearchField.textProperty().addListener((obs, oldV, newV) -> searchExistingCustomers());
+        existingCustomerClearSearchButton.setOnAction(e -> clearExistingCustomerSearch());
         clearExistingCustomerButton.setOnAction(e -> clearExistingCustomerSelection());
 
         // Настройка DatePicker
@@ -877,6 +880,12 @@ public class CashierController implements Initializable {
         updateSelectedExistingCustomer(null);
     }
 
+    private void clearExistingCustomerSearch() {
+        existingCustomerSearchField.clear();
+        existingCustomersList.setAll(customersList);
+        clearExistingCustomerSelection();
+    }
+
     private void searchExistingCustomers() {
         String text = existingCustomerSearchField.getText().trim();
         if (text.isEmpty()) {
@@ -938,7 +947,7 @@ public class CashierController implements Initializable {
     }
 
     private void clearSaleForm() {
-        clearExistingCustomerSelection();
+        clearExistingCustomerSearch();
         guestCustomerRadio.setSelected(true);
         updateCustomerInputsVisibility();
         selectedSeatIds.clear();
