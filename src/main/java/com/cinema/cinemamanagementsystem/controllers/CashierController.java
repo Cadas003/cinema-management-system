@@ -61,8 +61,6 @@ public class CashierController implements Initializable {
     @FXML private RadioButton registeredCustomerRadio;
     @FXML private TextField registeredSearchField;
     @FXML private ComboBox<Customer> registeredCustomerCombo;
-    @FXML private RadioButton immediateSaleRadio;
-    @FXML private RadioButton bookingRadio;
     @FXML private ComboBox<String> paymentMethodCombo;
     @FXML private Button sellTicketButton;
     @FXML private Button bookTicketButton;
@@ -164,11 +162,6 @@ public class CashierController implements Initializable {
 
     private void setupSellingTab() {
         // Группа радиокнопок
-        ToggleGroup saleTypeGroup = new ToggleGroup();
-        immediateSaleRadio.setToggleGroup(saleTypeGroup);
-        bookingRadio.setToggleGroup(saleTypeGroup);
-        immediateSaleRadio.setSelected(true);
-
         ToggleGroup customerTypeGroup = new ToggleGroup();
         guestCustomerRadio.setToggleGroup(customerTypeGroup);
         registeredCustomerRadio.setToggleGroup(customerTypeGroup);
@@ -178,7 +171,6 @@ public class CashierController implements Initializable {
             updateCustomerMode();
             updateTotalSelected();
         });
-        saleTypeGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> updateTotalSelected());
 
         // Настройка DatePicker
         setupDatePicker();
@@ -580,7 +572,7 @@ public class CashierController implements Initializable {
                 tooltipText.append("Ряд: ").append(rowNum).append("\n");
                 tooltipText.append("Место: ").append(colNum).append("\n");
                 tooltipText.append("Категория: ").append(categoryName).append("\n");
-                tooltipText.append("Цена: ").append(String.format("%.2f руб.", calculateTicketPrice()));
+                tooltipText.append("Цена: ").append(String.format("%.2f руб.", calculateTicketPrice(false)));
 
                 Tooltip tooltip = new Tooltip(tooltipText.toString());
                 tooltip.setStyle("-fx-font-size: 12px; -fx-font-weight: normal;");
@@ -662,7 +654,7 @@ public class CashierController implements Initializable {
 
     private void updateTotalSelected() {
         int count = selectedSeatIds.size();
-        double pricePerTicket = selectedShowtime != null ? calculateTicketPrice() : 0;
+        double pricePerTicket = selectedShowtime != null ? calculateTicketPrice(false) : 0;
         double total = count * pricePerTicket;
 
         totalSelectedLabel.setText(String.format("Выбрано: %d мест | Итого: %.2f руб.", count, total));
@@ -800,7 +792,7 @@ public class CashierController implements Initializable {
         int freeSeats = totalSeats - takenSeats;
 
         selectedPriceLabel.setText(String.format("Цена: %.2f руб. | Свободно: %d/%d",
-                calculateTicketPrice(), freeSeats, totalSeats));
+                calculateTicketPrice(false), freeSeats, totalSeats));
     }
 
     private void clearFilmSelection() {
@@ -913,13 +905,13 @@ public class CashierController implements Initializable {
         loadRegisteredCustomers();
     }
 
-    private double calculateTicketPrice() {
+    private double calculateTicketPrice(boolean isBooking) {
         if (selectedShowtime == null) {
             return 0;
         }
 
         double price = selectedShowtime.getFinalPrice();
-        if (bookingRadio.isSelected()) {
+        if (isBooking) {
             price *= (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
         }
 

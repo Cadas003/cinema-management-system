@@ -103,20 +103,13 @@
                                             <RadioButton fx:id="guestCustomerRadio" text="Гость" selected="true"/>
                                             <RadioButton fx:id="registeredCustomerRadio" text="Зарегистрированный клиент"/>
                                         </VBox>
-                                        <TextField fx:id="registeredSearchField" promptText="Поиск клиента"/>
+                                        <TextField fx:id="registeredSearchField" promptText="Быстрый поиск клиента"/>
                                         <ComboBox fx:id="registeredCustomerCombo" promptText="Выберите клиента" maxWidth="Infinity"/>
                                         <Label text="Регистрация клиента — во вкладке «Клиенты»" styleClass="help-text"/>
                                     </VBox>
 
                                     <VBox spacing="8" styleClass="sidebar-card">
-                                        <Label text="Тип операции" styleClass="section-title"/>
-                                        <VBox spacing="6">
-                                            <RadioButton fx:id="immediateSaleRadio" text="Немедленная продажа" selected="true"/>
-                                            <RadioButton fx:id="bookingRadio" text="Бронирование на 15 минут"/>
-                                        </VBox>
-                                    </VBox>
-
-                                    <VBox spacing="8" styleClass="sidebar-card">
+                                        <Label text="Действия" styleClass="section-title"/>
                                         <Label fx:id="paymentMethodLabel" text="Способ оплаты" styleClass="section-title"
                                                visible="false" managed="false"/>
                                         <ComboBox fx:id="paymentMethodCombo" prefWidth="200"
@@ -129,7 +122,7 @@
                                         </HBox>
                                         <VBox spacing="4" styleClass="hint-card">
                                             <Label text="Подсказка" styleClass="hint-title"/>
-                                            <Label text="1. Дата → 2. Фильм и время → 3. Места → 4. Данные клиента"
+                                            <Label text="1. Дата → 2. Фильм и время → 3. Места → 4. Клиент"
                                                    styleClass="help-text" wrapText="true"/>
                                         </VBox>
                                     </VBox>
