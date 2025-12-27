@@ -127,7 +127,7 @@
 
                                         <Label fx:id="selectedExistingCustomerLabel"
                                                text="Клиент не выбран"
-                                               style="-fx-text-fill: #7f8c8d;"/>
+                                               styleClass="muted-label"/>
                                         <Button fx:id="clearExistingCustomerButton" text="Сбросить выбор"/>
                                     </VBox>
                                 </VBox>
