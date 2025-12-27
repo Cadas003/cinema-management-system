@@ -8,7 +8,8 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.TicketSaleController"
             prefHeight="520.0" prefWidth="840.0"
-            styleClass="app-root ticket-compact">
+            styleClass="app-root ticket-compact"
+            stylesheets="@style.css">
 
     <top>
         <VBox spacing="8" styleClass="content-wrapper compact-section">
