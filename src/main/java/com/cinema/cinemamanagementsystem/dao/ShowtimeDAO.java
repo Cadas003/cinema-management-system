@@ -57,6 +57,31 @@ public class ShowtimeDAO {
         return showtimes;
     }
 
+    public Showtime getShowtimeById(int showtimeId) {
+        String query =
+                "SELECT s.*, f.title AS film_title, h.name AS hall_name, " +
+                        "       pr.name AS rule_name, pr.coefficient " +
+                        "FROM showtime s " +
+                        "JOIN film f ON s.film_id = f.film_id " +
+                        "JOIN hall h ON s.hall_id = h.hall_id " +
+                        "LEFT JOIN price_rule pr ON s.rule_id = pr.rule_id " +
+                        "WHERE s.showtime_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, showtimeId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToShowtime(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при получении сеанса по ID: {}", e.getMessage());
+        }
+        return null;
+    }
+
     // Добавить сеанс
     public boolean addShowtime(Showtime showtime) {
         String query = "INSERT INTO showtime (film_id, hall_id, date_time, base_price, rule_id) VALUES (?, ?, ?, ?, ?)";

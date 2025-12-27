@@ -1,290 +1,183 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.shape.Rectangle?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cinema.cinemamanagementsystem.controllers.CashierController"
-            prefHeight="800.0" prefWidth="1200.0">
+            prefHeight="800.0" prefWidth="1200.0"
+            styleClass="app-root">
 
     <top>
-        <VBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+        <VBox spacing="10" styleClass="app-header">
             <HBox spacing="20" alignment="CENTER_LEFT">
-                <Label text="Кинотеатр 'КиноСфера' - Панель кассира"
-                       style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;">
-                    <font>
-                        <Font name="System Bold" size="20.0" />
-                    </font>
-                </Label>
+                <VBox spacing="2">
+                    <Label text="🎬 КиноСфера" styleClass="header-title">
+                        <font>
+                            <Font name="System Bold" size="20.0" />
+                        </font>
+                    </Label>
+                    <Label text="Панель кассира" styleClass="header-subtitle"/>
+                </VBox>
 
-                <HBox spacing="10" HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
-                    <Label fx:id="welcomeLabel" text="Кассир: "
-                           style="-fx-text-fill: white;"/>
-                    <Label fx:id="currentTimeLabel"
-                           style="-fx-text-fill: #bdc3c7;"/>
-                    <Button text="Выйти" onAction="#handleLogout"
-                            style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="14" alignment="CENTER_RIGHT">
+                    <VBox spacing="2" alignment="CENTER_RIGHT">
+                        <Label fx:id="welcomeLabel" text="Кассир:" styleClass="header-meta"/>
+                        <Label fx:id="currentTimeLabel" styleClass="header-time"/>
+                    </VBox>
+                    <Button text="Выйти" onAction="#handleLogout" styleClass="button-danger"/>
                 </HBox>
             </HBox>
-
-            <MenuBar>
-                <Menu text="Файл">
-                    <MenuItem text="Выйти" onAction="#handleLogout"/>
-                </Menu>
-                <Menu text="Справка">
-                    <MenuItem text="О программе"/>
-                    <MenuItem text="Инструкция"/>
-                </Menu>
-            </MenuBar>
         </VBox>
     </top>
 
     <center>
-        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE">
-
-            <!-- Вкладка продажи -->
-            <Tab text="Продажа билетов">
-                <ScrollPane fitToWidth="true">
-                    <VBox spacing="20">
-                        <padding>
-                            <Insets top="20" right="20" bottom="20" left="20"/>
-                        </padding>
-
-                        <!-- ВЫБОР ДАТЫ -->
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label text="Выберите дату:"
-                                   style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                            <DatePicker fx:id="datePicker" prefWidth="200"/>
-                            <Label fx:id="totalSelectedLabel" text="Выбрано: 0 мест | Итого: 0.00 руб."
-                                   style="-fx-font-weight: bold; -fx-text-fill: #e74c3c; -fx-font-size: 14px;"/>
-                        </HBox>
-
-                        <HBox spacing="20">
-                            <!-- ЛЕВАЯ КОЛОНКА: Фильмы и сеансы -->
-                            <VBox spacing="10" prefWidth="650">
-                                <Label text="Фильмы и сеансы на выбранную дату:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-
-                                <!-- КАРТОЧКИ ФИЛЬМОВ -->
-                                <ScrollPane prefHeight="250" style="-fx-background-color: transparent;">
-                                    <TilePane fx:id="filmsTilePane"
-                                              hgap="15" vgap="15"
-                                              prefTileWidth="250"
-                                              prefTileHeight="150"
-                                              style="-fx-padding: 10;"/>
-                                </ScrollPane>
-
-                                <Label text="Информация о выбранном сеансе:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                <VBox spacing="5" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
-                                    <Label fx:id="selectedFilmLabel" text="Фильм: " style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="selectedDateTimeLabel" text="Время: " style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="selectedHallLabel" text="Зал: " style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="selectedPriceLabel" text="Цена: " style="-fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
-                                </VBox>
-
-                                <Label text="Выбор места:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                    <GridPane fx:id="seatGrid"
-                                              hgap="5" vgap="5"/>
-
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tabs">
+            <tabs>
+                <Tab text="Продажа билетов">
+                    <ScrollPane fitToWidth="true" styleClass="content-scroll">
+                            <VBox spacing="8" styleClass="content-wrapper compact-section">
+                            <VBox spacing="8" styleClass="hero-card">
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <Label text="📅" styleClass="hero-icon"/>
+                                    <Label text="Дата:" styleClass="hero-title"/>
+                                    <DatePicker fx:id="datePicker" prefWidth="160"/>
+                                    <Button text="Сегодня" onAction="#handleToday" styleClass="button-secondary"/>
+                                    <Pane HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="totalSelectedLabel" text="Выберите сеанс для продажи"
+                                           styleClass="hero-subtitle"/>
+                                </HBox>
+                                <Label text="Выберите сеанс для продажи" styleClass="hero-hint"/>
                             </VBox>
 
-                            <!-- ПРАВАЯ КОЛОНКА: Данные клиента -->
-                            <VBox spacing="15" prefWidth="350">
-                                <Label text="Данные клиента:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
-
-                                <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
-                                    <VBox spacing="8">
-                                        <Label text="ФИО клиента:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerNameField"
-                                                   promptText="Введите ФИО"
-                                                   prefWidth="320"/>
-                                    </VBox>
-
-                                    <VBox spacing="8">
-                                        <Label text="Телефон:" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerPhoneField"
-                                                   promptText="+7XXXXXXXXXX"
-                                                   prefWidth="320"/>
-                                    </VBox>
-
-                                    <VBox spacing="8">
-                                        <Label text="Email (необязательно):" style="-fx-font-weight: bold;"/>
-                                        <TextField fx:id="customerEmailField"
-                                                   promptText="email@example.com"
-                                                   prefWidth="320"/>
-                                    </VBox>
-                                </VBox>
-
-                                <Label text="Тип операции:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
-
-                                <HBox spacing="20" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
-                                    <VBox spacing="5">
-                                        <RadioButton fx:id="immediateSaleRadio"
-                                                     text="Немедленная продажа"
-                                                     selected="true"/>
-                                        <Label text="Билет сразу продается" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
-                                    </VBox>
-                                    <VBox spacing="5">
-                                        <RadioButton fx:id="bookingRadio"
-                                                     text="Бронирование"/>
-                                        <Label text="Бронь на 15 минут" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
-                                    </VBox>
-                                </HBox>
-
-                                <Label text="Способ оплаты:"
-                                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"
-                                       visible="false"
-                                       managed="false"
-                                       fx:id="paymentMethodLabel"/>
-
-                                <ComboBox fx:id="paymentMethodCombo"
-                                          prefWidth="200"
-                                          visible="false"
-                                          managed="false"/>
-
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Button fx:id="sellTicketButton"
-                                            text="ПРОДАТЬ БИЛЕТЫ"
-                                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"
-                                            prefWidth="160" prefHeight="40"/>
-
-                                    <Button fx:id="bookTicketButton"
-                                            text="ЗАБРОНИРОВАТЬ"
-                                            style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"
-                                            prefWidth="160" prefHeight="40"/>
-                                </HBox>
-
-                                <VBox spacing="5" style="-fx-padding: 10; -fx-background-color: #e8f5e9; -fx-border-radius: 5;">
-                                    <Label text="ПОДСКАЗКА:" style="-fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
-                                    <Label text="1. Выберите дату → 2. Выберите фильм и время → 3. Выберите места → 4. Заполните данные клиента"
-                                           style="-fx-text-fill: #2c3e50; -fx-font-size: 12px;" wrapText="true"/>
+                            <VBox spacing="6">
+                                <Label text="Сеансы на выбранную дату" styleClass="section-title"/>
+                                <VBox spacing="6" styleClass="card compact-card">
+                                    <ScrollPane prefHeight="340" styleClass="content-scroll">
+                                        <TilePane fx:id="filmsTilePane"
+                                                  hgap="12" vgap="12"
+                                                  prefTileWidth="220"
+                                                  prefTileHeight="140"
+                                                  styleClass="film-tiles film-grid">
+                                            <padding>
+                                                <Insets top="16" right="16" bottom="16" left="16"/>
+                                            </padding>
+                                        </TilePane>
+                                        <padding>
+                                            <Insets top="10" right="10" bottom="10" left="10"/>
+                                        </padding>
+                                    </ScrollPane>
                                 </VBox>
                             </VBox>
+                        </VBox>
+                    </ScrollPane>
+                </Tab>
+
+                <Tab text="Бронирования">
+                    <VBox spacing="12" styleClass="content-wrapper">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="Активные бронирования" styleClass="section-title"/>
+                            <Label text="(автообновление каждую минуту)" styleClass="help-text"/>
+                        </HBox>
+
+                        <TableView fx:id="bookingsTable" styleClass="card" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="bookingIdColumn" text="№" prefWidth="50"/>
+                                <TableColumn fx:id="bookingFilmColumn" text="Фильм" prefWidth="200"/>
+                                <TableColumn fx:id="bookingTimeColumn" text="Время брони" prefWidth="120"/>
+                                <TableColumn fx:id="bookingSeatColumn" text="Место" prefWidth="150"/>
+                                <TableColumn fx:id="bookingCustomerColumn" text="Клиент" prefWidth="150"/>
+                                <TableColumn fx:id="bookingStatusColumn" text="Статус" prefWidth="150"/>
+                            </columns>
+                        </TableView>
+
+                        <HBox spacing="12">
+                            <Button fx:id="confirmBookingButton" text="Подтвердить бронирование"
+                                    styleClass="button-success" prefWidth="220"/>
+                            <Button fx:id="cancelBookingButton" text="Отменить бронирование"
+                                    styleClass="button-danger" prefWidth="220"/>
                         </HBox>
                     </VBox>
-                </ScrollPane>
-            </Tab>
+                </Tab>
 
-            <!-- Вкладка бронирования -->
-            <Tab text="Бронирования">
-                <VBox spacing="10">
-                    <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
-                    </padding>
-
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Активные бронирования"
-                               style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                        <Label text="(автообновление каждую минуту)"
-                               style="-fx-text-fill: #7f8c8d;"/>
-                    </HBox>
-
-                    <TableView fx:id="bookingsTable" prefHeight="400">
-                        <columns>
-                            <TableColumn fx:id="bookingIdColumn" text="№" prefWidth="50"/>
-                            <TableColumn fx:id="bookingFilmColumn" text="Фильм" prefWidth="200"/>
-                            <TableColumn fx:id="bookingTimeColumn" text="Время брони" prefWidth="100"/>
-                            <TableColumn fx:id="bookingSeatColumn" text="Место" prefWidth="150"/>
-                            <TableColumn fx:id="bookingCustomerColumn" text="Клиент" prefWidth="150"/>
-                            <TableColumn fx:id="bookingStatusColumn" text="Статус" prefWidth="150"/>
-                        </columns>
-                    </TableView>
-
-                    <HBox spacing="10">
-                        <Button fx:id="confirmBookingButton"
-                                text="Подтвердить бронирование"
-                                style="-fx-background-color: #2ecc71; -fx-text-fill: white;"
-                                prefWidth="200"/>
-                        <Button fx:id="cancelBookingButton"
-                                text="Отменить бронирование"
-                                style="-fx-background-color: #e74c3c; -fx-text-fill: white;"
-                                prefWidth="200"/>
-                    </HBox>
-                </VBox>
-            </Tab>
-
-            <!-- Вкладка клиенты -->
-            <Tab text="Клиенты">
-                <VBox spacing="10">
-                    <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
-                    </padding>
-
-                    <HBox spacing="10">
-                        <TextField fx:id="customerSearchField"
-                                   promptText="Поиск по имени, телефону или email"
-                                   prefWidth="300"/>
-                        <Button fx:id="searchCustomerButton" text="Найти"/>
-                    </HBox>
-
-                    <TableView fx:id="customersTable" prefHeight="500">
-                        <columns>
-                            <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="50"/>
-                            <TableColumn fx:id="customerNameColumn" text="ФИО" prefWidth="200"/>
-                            <TableColumn fx:id="customerPhoneColumn" text="Телефон" prefWidth="150"/>
-                            <TableColumn fx:id="customerVisitsColumn" text="Посещений" prefWidth="80"/>
-                            <TableColumn fx:id="customerTotalColumn" text="Всего потрачено" prefWidth="120"/>
-                        </columns>
-                    </TableView>
-                </VBox>
-            </Tab>
-
-            <!-- Вкладка возвраты -->
-            <Tab text="Возвраты">
-                <VBox spacing="20">
-                    <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
-                    </padding>
-
-                    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;">
-                        <Label text="Оформление возврата"
-                               style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label text="Номер билета:" prefWidth="100"/>
-                            <TextField fx:id="refundTicketIdField"
-                                       promptText="Введите номер билета"
-                                       prefWidth="150"/>
+                <Tab text="Клиенты">
+                    <VBox spacing="12" styleClass="content-wrapper">
+                        <HBox spacing="10">
+                            <TextField fx:id="customerSearchField"
+                                       promptText="Поиск по имени, телефону или email"
+                                       prefWidth="320"/>
+                            <Button fx:id="searchCustomerButton" text="Найти" styleClass="button-primary"/>
                         </HBox>
 
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label text="Причина возврата:" prefWidth="100"/>
-                            <TextField fx:id="refundReasonField"
-                                       promptText="Укажите причину возврата"
-                                       prefWidth="300"/>
-                        </HBox>
+                        <VBox spacing="8" styleClass="card">
+                            <Label text="Регистрация клиента" styleClass="section-title"/>
+                            <GridPane hgap="10" vgap="8">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="20"/>
+                                    <ColumnConstraints percentWidth="80"/>
+                                </columnConstraints>
+                                <Label text="ФИО:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <TextField fx:id="registrationNameField" promptText="Введите ФИО"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                <Label text="Телефон:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <TextField fx:id="registrationPhoneField" promptText="+7XXXXXXXXXX"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <TextField fx:id="registrationEmailField" promptText="email@example.com"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </GridPane>
+                            <Button fx:id="registerCustomerButton" text="Зарегистрировать" styleClass="button-success"/>
+                        </VBox>
 
-                        <Button fx:id="refundButton"
-                                text="Оформить возврат"
-                                style="-fx-background-color: #e74c3c; -fx-text-fill: white;"
-                                prefWidth="150"/>
-                    </VBox>
-
-                    <VBox spacing="10">
-                        <Label text="Недавние продажи"
-                               style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                        <TableView fx:id="recentTicketsTable" prefHeight="300">
-                            <!-- Колонки для недавних билетов -->
+                        <TableView fx:id="customersTable" styleClass="card" prefHeight="500">
+                            <columns>
+                                <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="50"/>
+                                <TableColumn fx:id="customerNameColumn" text="ФИО" prefWidth="200"/>
+                                <TableColumn fx:id="customerPhoneColumn" text="Телефон" prefWidth="150"/>
+                                <TableColumn fx:id="customerVisitsColumn" text="Посещений" prefWidth="100"/>
+                                <TableColumn fx:id="customerTotalColumn" text="Всего потрачено" prefWidth="140"/>
+                            </columns>
                         </TableView>
                     </VBox>
-                </VBox>
-            </Tab>
+                </Tab>
 
+                <Tab text="Возвраты">
+                    <VBox spacing="16" styleClass="content-wrapper">
+                        <VBox spacing="12" styleClass="card">
+                            <Label text="Оформление возврата" styleClass="section-title"/>
+
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Номер билета:" prefWidth="120"/>
+                                <TextField fx:id="refundTicketIdField" promptText="Введите номер билета" prefWidth="180"/>
+                            </HBox>
+
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Причина возврата:" prefWidth="120"/>
+                                <TextField fx:id="refundReasonField" promptText="Укажите причину возврата" prefWidth="320"/>
+                            </HBox>
+
+                            <Button fx:id="refundButton" text="Оформить возврат" styleClass="button-danger" prefWidth="180"/>
+                        </VBox>
+
+                        <VBox spacing="10">
+                            <Label text="Недавние продажи" styleClass="section-title"/>
+                            <TableView fx:id="recentTicketsTable" styleClass="card" prefHeight="300"/>
+                        </VBox>
+                    </VBox>
+                </Tab>
+            </tabs>
         </TabPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #ecf0f1; -fx-padding: 10;">
+        <HBox spacing="10" alignment="CENTER" styleClass="app-footer">
             <Label text="Статус: "/>
-            <Label text="Готов к работе" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+            <Label text="Готов к работе" styleClass="status-ready"/>
             <Pane HBox.hgrow="ALWAYS"/>
             <Label text="© 2025 Кинотеатр 'КиноСфера'. Версия 1.0"/>
         </HBox>

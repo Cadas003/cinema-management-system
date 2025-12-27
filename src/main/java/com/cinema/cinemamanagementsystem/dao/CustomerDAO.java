@@ -50,6 +50,133 @@ public class CustomerDAO {
         return null;
     }
 
+    // Создать гостя (без регистрации)
+    public Customer createGuestCustomer(String name, String phone, String email) {
+        String query = "INSERT INTO customer (name, phone, email, registered, created_at) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, phone);
+            pstmt.setString(3, email);
+            pstmt.setBoolean(4, false);
+            pstmt.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now()));
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) {
+                    Customer newCustomer = new Customer();
+                    newCustomer.setCustomerId(rs.getInt(1));
+                    newCustomer.setName(name);
+                    newCustomer.setPhone(phone);
+                    newCustomer.setEmail(email);
+                    newCustomer.setRegistered(false);
+                    newCustomer.setCreatedAt(java.time.LocalDateTime.now());
+                    return newCustomer;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при создании гостя: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public Customer getCustomerById(int customerId) {
+        String query = "SELECT * FROM customer WHERE customer_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, customerId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToCustomer(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при поиске клиента по ID: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public List<Customer> getRegisteredCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        String query = "SELECT * FROM customer WHERE registered = 1 ORDER BY name";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                customers.add(mapResultSetToCustomer(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при получении зарегистрированных клиентов: {}", e.getMessage());
+        }
+
+        return customers;
+    }
+
+    public Customer registerCustomer(String name, String phone, String email) {
+        Customer existing = findCustomerByPhone(phone);
+        if (existing != null) {
+            if (!existing.isRegistered()) {
+                String updateQuery = "UPDATE customer SET name = ?, email = ?, registered = 1 WHERE customer_id = ?";
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement pstmt = conn.prepareStatement(updateQuery)) {
+
+                    pstmt.setString(1, name);
+                    pstmt.setString(2, email);
+                    pstmt.setInt(3, existing.getCustomerId());
+
+                    if (pstmt.executeUpdate() > 0) {
+                        existing.setName(name);
+                        existing.setEmail(email);
+                        existing.setRegistered(true);
+                    }
+                } catch (SQLException e) {
+                    logger.error("Ошибка при обновлении регистрации клиента: {}", e.getMessage());
+                    return null;
+                }
+            }
+            return existing;
+        }
+
+        String query = "INSERT INTO customer (name, phone, email, registered, created_at) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, phone);
+            pstmt.setString(3, email);
+            pstmt.setBoolean(4, true);
+            pstmt.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now()));
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) {
+                    Customer newCustomer = new Customer();
+                    newCustomer.setCustomerId(rs.getInt(1));
+                    newCustomer.setName(name);
+                    newCustomer.setPhone(phone);
+                    newCustomer.setEmail(email);
+                    newCustomer.setRegistered(true);
+                    newCustomer.setCreatedAt(java.time.LocalDateTime.now());
+                    return newCustomer;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Ошибка при регистрации клиента: {}", e.getMessage());
+        }
+        return null;
+    }
+
     // Найти клиента по телефону
     public Customer findCustomerByPhone(String phone) {
         String query = "SELECT * FROM customer WHERE phone = ?";

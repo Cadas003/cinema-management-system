@@ -19,7 +19,7 @@ public class BookingService {
 
     // Продажа билета (без бронирования)
     public Ticket sellTicket(int showtimeId, int seatId, int userId,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Customer customer, boolean isGuest) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -27,18 +27,17 @@ public class BookingService {
                 throw new IllegalStateException("Место уже занято или не существует");
             }
 
-
-            // 2. Находим или создаем клиента
-            Customer customer = customerDAO.findOrCreateCustomer(customerName, customerPhone, customerEmail);
-            if (customer == null) {
-                throw new IllegalStateException("Не удалось создать клиента");
+            // 2. Проверяем или создаем клиента-гостя
+            Customer resolvedCustomer = resolveCustomer(customer, isGuest);
+            if (resolvedCustomer == null) {
+                throw new IllegalStateException("Не удалось определить клиента");
             }
 
             // 3. Создаем билет со статусом "оплачен"
             Ticket ticket = new Ticket();
             ticket.setShowtimeId(showtimeId);
             ticket.setSeatId(seatId);
-            ticket.setCustomerId(customer.getCustomerId());
+            ticket.setCustomerId(resolvedCustomer.getCustomerId());
             ticket.setUserId(userId);
             ticket.setStatusId(DatabaseConfig.TicketStatus.PAID);
             ticket.setCreatedAt(LocalDateTime.now());
@@ -54,7 +53,7 @@ public class BookingService {
             Payment payment = new Payment();
             payment.setTicketId(ticketId);
             payment.setUserId(userId);
-            payment.setAmount(calculateFinalPrice(showtimeId, false));
+            payment.setAmount(calculateFinalPrice(showtimeId, false, isGuest));
             payment.setPaymentTime(LocalDateTime.now());
             payment.setMethodId(1); // Банковская карта по умолчанию
 
@@ -62,7 +61,7 @@ public class BookingService {
                 throw new IllegalStateException("Не удалось зарегистрировать платеж");
             }
 
-            logger.info("Билет #{} успешно продан клиенту {}", ticketId, customer.getName());
+            logger.info("Билет #{} успешно продан клиенту {}", ticketId, resolvedCustomer.getName());
             return ticket;
 
         } catch (Exception e) {
@@ -73,7 +72,7 @@ public class BookingService {
 
     // Бронирование билета
     public Ticket bookTicket(int showtimeId, int seatId, int userId,
-                             String customerName, String customerPhone, String customerEmail) {
+                             Customer customer, boolean isGuest) {
         try {
             // 1. Проверяем доступность места
             List<Integer> takenSeats = showtimeDAO.getTakenSeats(showtimeId);
@@ -81,18 +80,17 @@ public class BookingService {
                 throw new IllegalStateException("Место уже занято или не существует");
             }
 
-
-            // 2. Находим или создаем клиента
-            Customer customer = customerDAO.findOrCreateCustomer(customerName, customerPhone, customerEmail);
-            if (customer == null) {
-                throw new IllegalStateException("Не удалось создать клиента");
+            // 2. Проверяем или создаем клиента-гостя
+            Customer resolvedCustomer = resolveCustomer(customer, isGuest);
+            if (resolvedCustomer == null) {
+                throw new IllegalStateException("Не удалось определить клиента");
             }
 
             // 3. Создаем билет со статусом "забронирован"
             Ticket ticket = new Ticket();
             ticket.setShowtimeId(showtimeId);
             ticket.setSeatId(seatId);
-            ticket.setCustomerId(customer.getCustomerId());
+            ticket.setCustomerId(resolvedCustomer.getCustomerId());
             ticket.setUserId(userId);
             ticket.setStatusId(DatabaseConfig.TicketStatus.BOOKED);
             ticket.setCreatedAt(LocalDateTime.now());
@@ -105,7 +103,7 @@ public class BookingService {
 
             ticket.setTicketId(ticketId);
 
-            logger.info("Бронирование #{} создано для клиента {}", ticketId, customer.getName());
+            logger.info("Бронирование #{} создано для клиента {}", ticketId, resolvedCustomer.getName());
             return ticket;
 
         } catch (Exception e) {
@@ -138,7 +136,9 @@ public class BookingService {
             }
 
             // 4. Создаем платеж с доплатой 15%
-            double finalPrice = calculateFinalPrice(ticket.getShowtimeId(), true);
+            Customer customer = customerDAO.getCustomerById(ticket.getCustomerId());
+            boolean isGuest = customer == null || !customer.isRegistered();
+            double finalPrice = calculateFinalPrice(ticket.getShowtimeId(), true, isGuest);
 
             Payment payment = new Payment();
             payment.setTicketId(ticketId);
@@ -205,7 +205,7 @@ public class BookingService {
     }
 
     // Расчет итоговой цены
-    private double calculateFinalPrice(int showtimeId, boolean isBooking) {
+    private double calculateFinalPrice(int showtimeId, boolean isBooking, boolean isGuest) {
         // Здесь должна быть логика расчета цены с учетом:
         // - базовой цены сеанса
         // - коэффициента времени (утро/вечер)
@@ -213,14 +213,38 @@ public class BookingService {
         // - категории места
         // - доплаты за бронирование (15% если isBooking = true)
 
-        // Временно возвращаем фиксированную цену
-        double basePrice = 300.0;
+        Showtime showtime = showtimeDAO.getShowtimeById(showtimeId);
+        double basePrice = showtime != null ? showtime.getFinalPrice() : 300.0;
 
         if (isBooking) {
-            return basePrice * (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
+            basePrice *= (1 + DatabaseConfig.BOOKING_SURCHARGE_RATE);
         }
 
-        return basePrice;
+        if (isGuest) {
+            return basePrice * (1 + DatabaseConfig.GUEST_SURCHARGE_RATE);
+        }
+
+        return basePrice * (1 - DatabaseConfig.REGISTERED_DISCOUNT_RATE);
+    }
+
+    private Customer resolveCustomer(Customer customer, boolean isGuest) {
+        if (customer == null) {
+            return null;
+        }
+
+        if (customer.getCustomerId() > 0) {
+            return customer;
+        }
+
+        if (!isGuest) {
+            return null;
+        }
+
+        return customerDAO.createGuestCustomer(
+                customer.getName(),
+                customer.getPhone(),
+                customer.getEmail()
+        );
     }
 
     // Автоматическая отмена истекших бронирований
